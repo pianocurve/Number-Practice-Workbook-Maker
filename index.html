@@ -28,18 +28,32 @@
 
     .grid-table {
       width: 100%;
-      height: 100%; /* Take full available height of the A4 container minus headers */
       border-collapse: collapse;
       table-layout: fixed;
     }
 
     .grid-table td {
-      width: 10%;
+      width: calc(100% / 11); /* 11 columns */
       border: 1.2px solid #a4c2f4;
       position: relative;
       padding: 0;
       margin: 0;
       box-sizing: border-box;
+    }
+
+    /* Standard technique to force exact aspect-ratio 1:1 squares on grid cells responsive */
+    .grid-table td::after {
+      content: "";
+      display: block;
+      padding-bottom: 100%;
+    }
+
+    .cell-inner {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
     }
 
     /* Interactive editor styles */
@@ -102,8 +116,8 @@
         </p>
       </div>
 
-      <!-- Digit tabs (0-9) -->
-      <div class="grid grid-cols-5 gap-1.5" id="digit-tabs-container">
+      <!-- Digit tabs (1-0, =) -->
+      <div class="grid grid-cols-6 gap-1" id="digit-tabs-container">
         <!-- Generated dynamically in JS -->
       </div>
 
@@ -126,7 +140,7 @@
       </div>
 
       <div class="flex items-center justify-between border-t pt-4">
-        <span class="text-xs text-slate-500">※ドラッグした形は右側の15段シートにリアルタイム自動同期します。</span>
+        <span class="text-xs text-slate-500">※ドラッグした形は右側の14段シートにリアルタイム自動同期します。</span>
       </div>
 
       <div class="flex items-center gap-2 mt-1 border-t pt-3">
@@ -159,8 +173,8 @@
           </div>
         </div>
 
-        <!-- The 10x15 practice grid -->
-        <div class="flex-1 flex flex-col">
+        <!-- The 11x14 practice grid -->
+        <div class="flex-1 flex flex-col justify-start">
           <table class="grid-table" id="worksheet-table">
             <!-- Rows and cols dynamically filled here -->
           </table>
@@ -181,7 +195,7 @@
     }
 
     // Default coordinate map designed specifically to align with the slanted handwritten style
-    // Features the user's custom perfect bezier curves for all digits.
+    // Features the user's custom perfect bezier curves for all digits, including the brand new "=" stroke curve.
     const INITIAL_DIGITS = {
       "0": {
         "strokes": [
@@ -297,6 +311,18 @@
             { "x": 42, "y": 82, "hIn": { "x": 42, "y": 82 } }
           ]
         ]
+      },
+      "=": {
+        "strokes": [
+          [
+            { "x": 28, "y": 42, "hOut": { "x": 28, "y": 42 } },
+            { "x": 72, "y": 42, "hIn": { "x": 72, "y": 42 } }
+          ],
+          [
+            { "x": 28, "y": 58, "hOut": { "x": 28, "y": 58 } },
+            { "x": 72, "y": 58, "hIn": { "x": 72, "y": 58 } }
+          ]
+        ]
       }
     };
 
@@ -304,9 +330,9 @@
     let digits = deepClone(INITIAL_DIGITS);
     let selectedDigit = '1';
     
-    // Grid settings
-    const digitOrder = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'];
-    const totalRows = 15;
+    // Grid settings - 11 items, 14 rows allows A4 sheets with perfectly squared cells to fit beautifully
+    const digitOrder = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '='];
+    const totalRows = 14; 
     const fadeOpacities = [1.0, 0.65, 0.40, 0.20, 0.08]; // Decreasing stroke visibility for tracing practice
 
     // Helper to generate SVG Path String from a stroke data array
@@ -515,8 +541,10 @@
 
         digitOrder.forEach(num => {
           const td = document.createElement('td');
-          const container = document.createElement('div');
-          container.className = 'w-full h-full flex justify-center items-center';
+          
+          // Container helper inside td to support aspect ratio calculation
+          const innerDiv = document.createElement('div');
+          innerDiv.className = 'cell-inner flex justify-center items-center';
 
           const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
           svg.setAttribute('viewBox', '0 0 100 100');
@@ -540,21 +568,23 @@
             const opacity = fadeOpacities[r];
             const dData = digits[num];
 
-            dData.strokes.forEach(stroke => {
-              const strokePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-              strokePath.setAttribute('d', makePathData(stroke));
-              strokePath.setAttribute('fill', 'none');
-              strokePath.setAttribute('stroke', '#475569'); // Bold tracing slate color
-              strokePath.setAttribute('stroke-width', '7');
-              strokePath.setAttribute('stroke-linecap', 'round');
-              strokePath.setAttribute('stroke-linejoin', 'round');
-              strokePath.setAttribute('opacity', opacity);
-              svg.appendChild(strokePath);
-            });
+            if (dData && dData.strokes) {
+              dData.strokes.forEach(stroke => {
+                const strokePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                strokePath.setAttribute('d', makePathData(stroke));
+                strokePath.setAttribute('fill', 'none');
+                strokePath.setAttribute('stroke', '#475569'); // Bold tracing slate color
+                strokePath.setAttribute('stroke-width', '7');
+                strokePath.setAttribute('stroke-linecap', 'round');
+                strokePath.setAttribute('stroke-linejoin', 'round');
+                strokePath.setAttribute('opacity', opacity);
+                svg.appendChild(strokePath);
+              });
+            }
           }
 
-          container.appendChild(svg);
-          td.appendChild(container);
+          innerDiv.appendChild(svg);
+          td.appendChild(innerDiv);
           tr.appendChild(td);
         });
 
@@ -599,13 +629,13 @@
       ctx.lineTo(2360, 310);
       ctx.stroke();
 
-      // Grid settings for A4 10 cols x 15 rows
+      // Grid settings for A4 11 cols x 14 rows (Perfect Squares)
       const gridLeft = 120;
       const gridTop = 360;
       const gridWidth = 2240;
-      const gridHeight = 2980;
-      const colWidth = gridWidth / 10;
-      const rowHeight = gridHeight / totalRows;
+      const colWidth = gridWidth / 11; // 11 columns
+      const rowHeight = colWidth;      // Perfect square
+      const gridHeight = rowHeight * totalRows;
 
       // 3. Draw grid system
       for (let r = 0; r <= totalRows; r++) {
@@ -617,10 +647,10 @@
         ctx.stroke();
       }
 
-      for (let c = 0; c <= 10; c++) {
+      for (let c = 0; c <= 11; c++) {
         ctx.beginPath();
         ctx.strokeStyle = '#a4c2f4';
-        ctx.lineWidth = (c === 0 || c === 10) ? 5 : 3;
+        ctx.lineWidth = (c === 0 || c === 11) ? 5 : 3;
         ctx.moveTo(gridLeft + c * colWidth, gridTop);
         ctx.lineTo(gridLeft + c * colWidth, gridTop + gridHeight);
         ctx.stroke();
@@ -628,7 +658,7 @@
 
       // 4. Draw Leader/crosshair dash lines and Digit curves inside every block
       for (let r = 0; r < totalRows; r++) {
-        for (let c = 0; c < 10; c++) {
+        for (let c = 0; c < 11; c++) {
           const cellX = gridLeft + c * colWidth;
           const cellY = gridTop + r * rowHeight;
           const centerX = cellX + colWidth / 2;
@@ -652,37 +682,39 @@
             const digitData = digits[digitChar];
             const opacity = fadeOpacities[r];
 
-            ctx.save();
-            ctx.globalAlpha = opacity;
-            ctx.strokeStyle = '#475569'; // Bold tracing slate color
-            ctx.lineWidth = 15; // Brush thickness
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
+            if (digitData && digitData.strokes) {
+              ctx.save();
+              ctx.globalAlpha = opacity;
+              ctx.strokeStyle = '#475569'; // Bold tracing slate color
+              ctx.lineWidth = 15; // Brush thickness
+              ctx.lineCap = 'round';
+              ctx.lineJoin = 'round';
 
-            digitData.strokes.forEach(stroke => {
-              if (stroke.length === 0) return;
-              ctx.beginPath();
+              digitData.strokes.forEach(stroke => {
+                if (stroke.length === 0) return;
+                ctx.beginPath();
 
-              const mapPt = (p) => ({
-                x: cellX + (p.x / 100) * colWidth,
-                y: cellY + (p.y / 100) * rowHeight
+                const mapPt = (p) => ({
+                  x: cellX + (p.x / 100) * colWidth,
+                  y: cellY + (p.y / 100) * rowHeight
+                });
+
+                const startPt = mapPt(stroke[0]);
+                ctx.moveTo(startPt.x, startPt.y);
+
+                for (let i = 1; i < stroke.length; i++) {
+                  const prev = stroke[i - 1];
+                  const curr = stroke[i];
+                  const cp1 = mapPt(prev.hOut ? prev.hOut : { x: prev.x, y: prev.y });
+                  const cp2 = mapPt(curr.hIn ? curr.hIn : { x: curr.x, y: curr.y });
+                  const end = mapPt(curr);
+
+                  ctx.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, end.x, end.y);
+                }
+                ctx.stroke();
               });
-
-              const startPt = mapPt(stroke[0]);
-              ctx.moveTo(startPt.x, startPt.y);
-
-              for (let i = 1; i < stroke.length; i++) {
-                const prev = stroke[i - 1];
-                const curr = stroke[i];
-                const cp1 = mapPt(prev.hOut ? prev.hOut : { x: prev.x, y: prev.y });
-                const cp2 = mapPt(curr.hIn ? curr.hIn : { x: curr.x, y: curr.y });
-                const end = mapPt(curr);
-
-                ctx.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, end.x, end.y);
-              }
-              ctx.stroke();
-            });
-            ctx.restore();
+              ctx.restore();
+            }
           }
         }
       }
@@ -691,7 +723,7 @@
       const dataURL = canvas.toDataURL('image/png');
       const downloadLink = document.createElement('a');
       downloadLink.href = dataURL;
-      downloadLink.download = 'すうじのれんしゅうちょう_A4.png';
+      downloadLink.download = 'すうじのれんしゅうちょう_A4_11列.png';
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);
@@ -699,15 +731,16 @@
 
     // UI Event Handlers
     resetAllBtn.addEventListener('click', () => {
-      if (confirm('すべての数字の形を初期形にリセットしますか？')) {
-        digits = deepClone(INITIAL_DIGITS);
-        renderEditor();
-        renderWorksheet();
-      }
+      // Replaced unsafe confirm() with instant safe reset + custom toast notification
+      digits = deepClone(INITIAL_DIGITS);
+      renderEditor();
+      renderWorksheet();
+      showToast('編集した書体を初期状態にリセットしました！', '🔄');
     });
 
     downloadPngBtn.addEventListener('click', () => {
       generateHighResPNG();
+      showToast('練習シートのPNG画像を保存しました！', '💾');
     });
 
     exportJsonBtn.addEventListener('click', () => {
@@ -718,6 +751,7 @@
       document.body.appendChild(downloadAnchorNode);
       downloadAnchorNode.click();
       downloadAnchorNode.remove();
+      showToast('ベジェデータをエクスポートしました！', '📤');
     });
 
     importJsonInput.addEventListener('change', (event) => {
@@ -727,7 +761,11 @@
       reader.onload = (e) => {
         try {
           const importedData = JSON.parse(e.target.result);
+          // Standard check to support legacy imports lacking the "=" key gracefully
           if (importedData['1'] && importedData['2']) {
+            if (!importedData['=']) {
+              importedData['='] = deepClone(INITIAL_DIGITS['=']);
+            }
             digits = importedData;
             renderEditor();
             renderWorksheet();
@@ -760,31 +798,6 @@
         toast.classList.add('opacity-0', 'pointer-events-none');
       }, 3000);
     }
-
-    // UI Event Handlers
-    resetAllBtn.addEventListener('click', () => {
-      // Replaced unsafe confirm() with instant safe reset + custom toast notification
-      digits = deepClone(INITIAL_DIGITS);
-      renderEditor();
-      renderWorksheet();
-      showToast('編集した書体を初期状態にリセットしました！', '🔄');
-    });
-
-    downloadPngBtn.addEventListener('click', () => {
-      generateHighResPNG();
-      showToast('練習シートのPNG画像を保存しました！', '💾');
-    });
-
-    exportJsonBtn.addEventListener('click', () => {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(digits, null, 2));
-      const downloadAnchorNode = document.createElement('a');
-      downloadAnchorNode.setAttribute("href", dataStr);
-      downloadAnchorNode.setAttribute("download", "suuji_bezier_data.json");
-      document.body.appendChild(downloadAnchorNode);
-      downloadAnchorNode.click();
-      downloadAnchorNode.remove();
-      showToast('ベジェデータをエクスポートしました！', '📤');
-    });
 
     // Bootstrapping
     window.onload = function() {
