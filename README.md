@@ -28,7 +28,7 @@
 
 ## 🚀 使い方
 
-1. `index.html` をブラウザ（Chrome, Edge, Safari等）で開きます。
+1. https://pianocurve.github.io/Number-Practice-Workbook-Maker/　をブラウザ（Chrome, Edge, Safari等）で開きます。
 2. 左側の**編集パネル**で数字（0〜9）タブを切り替え、アンカーポイントやハンドルをドラッグして理想の書体を作ります。
 3. 右側の**A4プレビュー画面**で練習シート全体の仕上がりを確認します。
 4. **「📥 A4練習シートをPNG画像で保存」** ボタンを押すと、高解像度のPNG画像がダウンロードされます。
