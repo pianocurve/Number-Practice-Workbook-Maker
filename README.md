@@ -1,2 +1,53 @@
-# Number-Practice-Workbook-Maker
-Number Practice Workbook Maker
+# ✏️ すうじのれんしゅうちょう Generator (Bezier Edition)
+
+![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
+![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat&logo=html5&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-06B6D4?style=flat&logo=tailwind-css&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&logo=javascript&logoColor=black)
+
+> **「綺麗な数字の書き方を、理想のフォントで直感的に。」**  
+> 小学生のお子様向けに、ベジェ曲線のハンドル操作で自由な書体（フォント）をデザインし、A4縦1枚ぴったりに印刷・画像保存できるインタラクティブな数字練習シート作成ウェブアプリケーションです。
+
+---
+
+## 🌟 主な特徴
+
+- **🖋️ ベジェ曲線による直感的な書体編集**
+  - 各数字（0〜9）のアンカーポイント（赤丸）や方向ハンドル（青丸・緑丸）をドラッグするだけで、思い通りの曲線や手書きのニュアンスを作成可能。
+  - 「4」の上の開き具合や、「7」の2画目の美しいカーブなども自在に表現できます。
+- **📉 5段目までのリアルタイム・フェード同期**
+  - 1段目で編集した最新の書体が、2段目（不透明度 0.6）→ 3段目（0.4）→ 4段目（0.22）→ 5段目（0.1）へと段々薄くなりながらリアルタイムに練習シート全段へ反映されます。
+- **💾 編集データの保存＆読み込み（JSON）**
+  - 作り込んだこだわりのベジェ曲線データを `.json` ファイルとしてPCにエクスポート／インポート可能。いつでも作業を再開・バックアップできます。
+- **🖼️ 高解像度 A4 PNG 直接ダウンロード**
+  - ブラウザの印刷によるレイアウト崩れを防ぐため、印刷品質に適した解像度（A4縦比率：2480px × 3508px）のPNG画像をワンクリックでダウンロード出力。
+- **📐 縦15段×横10列のA4ジャストフィット設計**
+  - 日本の学習ノートでおなじみの十字リーダー（破線ガイド）付きマス目（全150マス）を完璧なA4比率でレイアウト。
+
+---
+
+## 🚀 使い方
+
+1. `index.html` をブラウザ（Chrome, Edge, Safari等）で開きます。
+2. 左側の**編集パネル**で数字（0〜9）タブを切り替え、アンカーポイントやハンドルをドラッグして理想の書体を作ります。
+3. 右側の**A4プレビュー画面**で練習シート全体の仕上がりを確認します。
+4. **「📥 A4練習シートをPNG画像で保存」** ボタンを押すと、高解像度のPNG画像がダウンロードされます。
+5. ダウンロードした画像をプリンターでA4用紙（縦）に印刷してご使用ください。
+
+---
+
+## 🛠️ 技術構成
+
+- **HTML5 Canvas / Inline SVG**: ベジェ曲線の描画およびインタラクティブなノード操作
+- **Tailwind CSS**: レスポンシブで洗練されたモダンUI
+- **Vanilla JavaScript**: 外部ライブラリ非依存の軽量かつ高速な動的描画エンジン
+
+---
+
+## 📜 ライセンス
+
+本プロジェクトは **[MIT License](LICENSE)** のもとで公開されています。商用・個人利用を問わず、自由に改変・再配布いただけます。
+
+---
+
+*Created for children's learning and fun with numbers.*
