@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>すうじの練習帳メーカー (書き順矢印・段階縮小版)</title>
+  <title>すうじのれんしゅうちょうメーカー</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
@@ -39,7 +39,7 @@
       box-sizing: border-box;
     }
 
-    /* Standard technique to force exact aspect-ratio 1:1 squares on grid cells responsive */
+    /* 1:1 正方形セル */
     .grid-table td::after {
       content: "";
       display: block;
@@ -79,7 +79,7 @@
       <div class="flex items-center gap-3">
         <div class="bg-indigo-600 p-2.5 rounded-xl text-2xl shadow-inner">✍️</div>
         <div>
-          <h1 class="text-xl font-bold tracking-wider">すうじの練習帳デザインスタジオ</h1>
+          <h1 class="text-xl font-bold tracking-wider" id="app-header-title">すうじのれんしゅうちょうメーカー</h1>
           <p class="text-xs text-indigo-200 mt-0.5">ベジェハンドルで形を作り、書き順矢印を配置して高画質なA4シートを作成</p>
         </div>
       </div>
@@ -101,6 +101,7 @@
 
   <main class="flex-1 max-w-7xl mx-auto w-full p-4 lg:p-6 flex flex-col lg:flex-row gap-6 items-start justify-center">
     
+    <!-- エディタセクション -->
     <section class="w-full lg:w-[400px] bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col gap-5 shrink-0">
       <div>
         <h2 class="font-bold text-slate-900 text-base flex items-center gap-2 border-b pb-2 mb-3">
@@ -117,7 +118,7 @@
       <div class="flex justify-center my-1">
         <div class="editor-canvas-container">
           <svg id="editor-svg" viewBox="0 0 100 100" class="w-full h-full select-none cursor-default">
-            <!-- Background grid -->
+            <!-- 背景グリッド -->
             <line x1="0" y1="50" x2="100" y2="50" stroke="#f1f5f9" stroke-width="1" />
             <line x1="50" y1="0" x2="50" y2="100" stroke="#f1f5f9" stroke-width="1" />
             <line x1="0" y1="50" x2="100" y2="50" stroke="#cbd5e1" stroke-width="0.8" stroke-dasharray="3,3" />
@@ -140,16 +141,17 @@
       </div>
     </section>
 
+    <!-- プレビューセクション -->
     <section class="flex-1 w-full bg-slate-200/50 p-4 rounded-2xl flex justify-center items-start overflow-y-auto" style="min-height: 80vh;">
       <div class="a4-preview-sheet shadow-2xl flex flex-col">
         <div class="flex justify-between items-end border-b-2 border-slate-700 pb-2 mb-4 shrink-0" style="font-size: clamp(0.5rem, 1.5vw, 1rem);">
           <div>
-            <h2 class="text-[1.5em] font-bold tracking-widest text-slate-800 font-sans leading-none">すうじの れんしゅうちょう</h2>
-            <p class="text-[0.6em] text-slate-500 tracking-wider mt-1 font-semibold">ハミでないように　ていねいに なぞって、きれいな すうじを かいてみよう！</p>
+            <h2 id="sheet-title-display" class="text-[1.5em] font-bold tracking-widest text-slate-800 font-sans leading-none"></h2>
+            <p id="sheet-subtitle-display" class="text-[0.6em] text-slate-500 tracking-wider mt-1 font-semibold"></p>
           </div>
           <div class="text-right text-slate-700 flex items-end gap-1 font-bold text-[0.8em]">
-            <div>______ ねん ______ くみ</div>
-            <div class="border-b border-slate-800 pb-0.5 px-4 w-[12em] text-left text-slate-700">なまえ（　　　　　　　　　　）</div>
+            <div id="sheet-class-display"></div>
+            <div id="sheet-name-display" class="border-b border-slate-800 pb-0.5 px-4 w-[12em] text-left text-slate-700"></div>
           </div>
         </div>
         <div class="flex-1 flex flex-col justify-start">
@@ -163,9 +165,16 @@
   <canvas id="export-canvas" style="display: none;"></canvas>
 
   <script>
-    function deepClone(obj) {
-      return JSON.parse(JSON.stringify(obj));
-    }
+    // --- 共通設定・文言の管理 ---
+    const CONFIG = {
+      TITLE: 'すうじのれんしゅうちょう',
+      SUBTITLE: 'ハミでないように ていねいに なぞって、きれいな すうじを かいてみよう！',
+      CLASS_LABEL: '______ ねん ______ くみ',
+      NAME_LABEL: 'なまえ（          ）',
+      UNIFIED_OPACITY: 0.40,
+      TOTAL_ROWS: 15,
+      DIGIT_ORDER: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '=']
+    };
 
     const INITIAL_DIGITS = {
       "0": {
@@ -178,7 +187,7 @@
             { "x": 61, "y": 20, "hIn": { "x": 71, "y": 27 } }
           ]
         ],
-        "arrows": [{ "x": 55, "y": 20, "angle": 168.6900675259798 }]
+        "arrows": [{ "x": 55, "y": 20, "angle": 168.69 }]
       },
       "1": {
         "strokes": [
@@ -187,7 +196,7 @@
             { "x": 39, "y": 83, "hIn": { "x": 39, "y": 83 } }
           ]
         ],
-        "arrows": [{ "x": 55, "y": 24, "angle": 104.03624346792648 }]
+        "arrows": [{ "x": 55, "y": 24, "angle": 104.04 }]
       },
       "2": {
         "strokes": [
@@ -273,7 +282,7 @@
           ]
         ],
         "arrows": [
-          { "x": 40, "y": 26, "angle": 114.44395478041653 },
+          { "x": 40, "y": 26, "angle": 114.44 },
           { "x": 57, "y": 16, "angle": 0 }
         ]
       },
@@ -320,59 +329,70 @@
       }
     };
 
-    let digits = deepClone(INITIAL_DIGITS);
+    let digits = structuredClone(INITIAL_DIGITS);
     let selectedDigit = '1';
-    
-    const digitOrder = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '='];
-    const totalRows = 15; 
-    const unifiedOpacity = 0.40;
+    let draggingInfo = null;
 
-    // サイズ別に太さの開始値を細く調整 (大:3.0~, 中:2.0~, 小:1.5~)
-    const rowsConfig = [];
-    for (let r = 0; r < totalRows; r++) {
+    // 行の設定（スケールと線の太さ）
+    const rowsConfig = Array.from({ length: CONFIG.TOTAL_ROWS }, (_, r) => {
       if (r < 5) {
-        rowsConfig.push({ scale: 1.0, traceScale: [3.0, 2.5, 2.0, 1.5, 1.0][r] });
+        return { scale: 1.0, traceScale: [3.0, 2.5, 2.0, 1.5, 1.0][r] };
       } else if (r < 10) {
-        rowsConfig.push({ scale: 2/3, traceScale: [2.0, 1.7, 1.4, 1.1, 0.8][r - 5] });
+        return { scale: 2/3, traceScale: [2.0, 1.7, 1.4, 1.1, 0.8][r - 5] };
       } else {
-        rowsConfig.push({ scale: 1/2, traceScale: [1.5, 1.3, 1.1, 0.9, 0.7][r - 10] });
+        return { scale: 1/2, traceScale: [1.5, 1.3, 1.1, 0.9, 0.7][r - 10] };
       }
-    }
+    });
 
-    function makePathData(stroke) {
-      if (stroke.length === 0) return '';
-      let d = `M ${stroke[0].x} ${stroke[0].y}`;
+    // --- 共通ユーティリティ関数 ---
+    function makePathData(stroke, mapper = (p) => p) {
+      if (!stroke || stroke.length === 0) return '';
+      const start = mapper(stroke[0]);
+      let d = `M ${start.x} ${start.y}`;
       for (let i = 1; i < stroke.length; i++) {
         const prev = stroke[i - 1];
         const curr = stroke[i];
-        const cp1 = prev.hOut ? prev.hOut : { x: prev.x, y: prev.y };
-        const cp2 = curr.hIn ? curr.hIn : { x: curr.x, y: curr.y };
-        d += ` C ${cp1.x} ${cp1.y}, ${cp2.x} ${cp2.y}, ${curr.x} ${curr.y}`;
+        const cp1 = mapper(prev.hOut ? prev.hOut : prev);
+        const cp2 = mapper(curr.hIn ? curr.hIn : curr);
+        const end = mapper(curr);
+        d += ` C ${cp1.x} ${cp1.y}, ${cp2.x} ${cp2.y}, ${end.x} ${end.y}`;
       }
       return d;
     }
 
+    function createSvgElement(tag, attrs = {}) {
+      const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+      for (const [k, v] of Object.entries(attrs)) {
+        el.setAttribute(k, v);
+      }
+      return el;
+    }
+
+    // --- UIテキストの初期化 ---
+    function initTexts() {
+      document.getElementById('sheet-title-display').textContent = CONFIG.TITLE;
+      document.getElementById('sheet-subtitle-display').textContent = CONFIG.SUBTITLE;
+      document.getElementById('sheet-class-display').textContent = CONFIG.CLASS_LABEL;
+      document.getElementById('sheet-name-display').textContent = CONFIG.NAME_LABEL;
+    }
+
+    // --- タブ＆エディタ関連 ---
     const digitTabsContainer = document.getElementById('digit-tabs-container');
     const editorPathsG = document.getElementById('editor-paths');
     const editorControlsG = document.getElementById('editor-controls');
     const worksheetTable = document.getElementById('worksheet-table');
-    const resetAllBtn = document.getElementById('reset-all-btn');
-    const downloadPngBtn = document.getElementById('download-png-btn');
-    const exportJsonBtn = document.getElementById('export-json-btn');
-    const importJsonInput = document.getElementById('import-json-input');
 
     function createDigitTabs() {
       digitTabsContainer.innerHTML = '';
-      digitOrder.forEach(num => {
+      CONFIG.DIGIT_ORDER.forEach(num => {
         const btn = document.createElement('button');
         btn.className = `tab-btn py-2 text-sm font-bold rounded-lg border transition-all ${num === selectedDigit ? 'active' : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'}`;
         btn.textContent = num;
         btn.addEventListener('click', () => {
           selectedDigit = num;
           document.querySelectorAll('.tab-btn').forEach(b => {
-            b.classList.remove('active', 'bg-slate-50', 'hover:bg-slate-100', 'text-slate-700', 'border-slate-200');
-            if (b.textContent === selectedDigit) b.classList.add('active');
-            else b.classList.add('bg-slate-50', 'hover:bg-slate-100', 'text-slate-700', 'border-slate-200');
+            const isActive = b.textContent === selectedDigit;
+            b.className = `tab-btn py-2 text-sm font-bold rounded-lg border transition-all ${isActive ? 'active' : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'}`;
           });
           renderEditor();
         });
@@ -380,137 +400,78 @@
       });
     }
 
-    let draggingInfo = null;
-
     function renderEditor() {
       editorPathsG.innerHTML = '';
       editorControlsG.innerHTML = '';
 
       const digitData = digits[selectedDigit];
 
+      // パス描画
       digitData.strokes.forEach(stroke => {
         const d = makePathData(stroke);
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path.setAttribute('d', d);
-        path.setAttribute('fill', 'none');
-        path.setAttribute('stroke', '#e2e8f0');
-        path.setAttribute('stroke-width', '10');
-        path.setAttribute('stroke-linecap', 'round');
-        path.setAttribute('stroke-linejoin', 'round');
-        editorPathsG.appendChild(path);
-
-        const innerPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        innerPath.setAttribute('d', d);
-        innerPath.setAttribute('fill', 'none');
-        innerPath.setAttribute('stroke', '#6366f1');
-        innerPath.setAttribute('stroke-width', '3');
-        innerPath.setAttribute('stroke-linecap', 'round');
-        innerPath.setAttribute('stroke-linejoin', 'round');
-        editorPathsG.appendChild(innerPath);
+        const outer = createSvgElement('path', { d, fill: 'none', stroke: '#e2e8f0', 'stroke-width': '10', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+        const inner = createSvgElement('path', { d, fill: 'none', stroke: '#6366f1', 'stroke-width': '3', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+        editorPathsG.appendChild(outer);
+        editorPathsG.appendChild(inner);
       });
 
+      // コントロールポイント描画
       digitData.strokes.forEach((stroke, sIdx) => {
         stroke.forEach((pt, pIdx) => {
-          const anchor = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-          anchor.setAttribute('cx', pt.x);
-          anchor.setAttribute('cy', pt.y);
-          anchor.setAttribute('r', '4');
-          anchor.setAttribute('fill', '#f43f5e');
-          anchor.setAttribute('stroke', '#ffffff');
-          anchor.setAttribute('stroke-width', '1.5');
-          anchor.setAttribute('class', 'cursor-move');
+          const anchor = createSvgElement('circle', { cx: pt.x, cy: pt.y, r: '4', fill: '#f43f5e', stroke: '#ffffff', 'stroke-width': '1.5', class: 'cursor-move' });
           anchor.addEventListener('mousedown', (e) => startDrag(e, sIdx, pIdx, 'anchor'));
           anchor.addEventListener('touchstart', (e) => startDrag(e, sIdx, pIdx, 'anchor'));
           editorControlsG.appendChild(anchor);
 
           if (pt.hIn && pIdx > 0) {
-            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            line.setAttribute('x1', pt.x); line.setAttribute('y1', pt.y);
-            line.setAttribute('x2', pt.hIn.x); line.setAttribute('y2', pt.hIn.y);
-            line.setAttribute('stroke', '#3b82f6'); line.setAttribute('stroke-width', '0.8'); line.setAttribute('stroke-dasharray', '2,2');
-            editorControlsG.appendChild(line);
-
-            const ctrl = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-            ctrl.setAttribute('cx', pt.hIn.x); ctrl.setAttribute('cy', pt.hIn.y);
-            ctrl.setAttribute('r', '3'); ctrl.setAttribute('fill', '#ffffff');
-            ctrl.setAttribute('stroke', '#3b82f6'); ctrl.setAttribute('stroke-width', '1.5');
-            ctrl.setAttribute('class', 'cursor-move');
+            const line = createSvgElement('line', { x1: pt.x, y1: pt.y, x2: pt.hIn.x, y2: pt.hIn.y, stroke: '#3b82f6', 'stroke-width': '0.8', 'stroke-dasharray': '2,2' });
+            const ctrl = createSvgElement('circle', { cx: pt.hIn.x, cy: pt.hIn.y, r: '3', fill: '#ffffff', stroke: '#3b82f6', 'stroke-width': '1.5', class: 'cursor-move' });
             ctrl.addEventListener('mousedown', (e) => startDrag(e, sIdx, pIdx, 'hIn'));
             ctrl.addEventListener('touchstart', (e) => startDrag(e, sIdx, pIdx, 'hIn'));
+            editorControlsG.appendChild(line);
             editorControlsG.appendChild(ctrl);
           }
 
           if (pt.hOut && pIdx < stroke.length - 1) {
-            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            line.setAttribute('x1', pt.x); line.setAttribute('y1', pt.y);
-            line.setAttribute('x2', pt.hOut.x); line.setAttribute('y2', pt.hOut.y);
-            line.setAttribute('stroke', '#10b981'); line.setAttribute('stroke-width', '0.8'); line.setAttribute('stroke-dasharray', '2,2');
-            editorControlsG.appendChild(line);
-
-            const ctrl = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-            ctrl.setAttribute('cx', pt.hOut.x); ctrl.setAttribute('cy', pt.hOut.y);
-            ctrl.setAttribute('r', '3'); ctrl.setAttribute('fill', '#ffffff');
-            ctrl.setAttribute('stroke', '#10b981'); ctrl.setAttribute('stroke-width', '1.5');
-            ctrl.setAttribute('class', 'cursor-move');
+            const line = createSvgElement('line', { x1: pt.x, y1: pt.y, x2: pt.hOut.x, y2: pt.hOut.y, stroke: '#10b981', 'stroke-width': '0.8', 'stroke-dasharray': '2,2' });
+            const ctrl = createSvgElement('circle', { cx: pt.hOut.x, cy: pt.hOut.y, r: '3', fill: '#ffffff', stroke: '#10b981', 'stroke-width': '1.5', class: 'cursor-move' });
             ctrl.addEventListener('mousedown', (e) => startDrag(e, sIdx, pIdx, 'hOut'));
             ctrl.addEventListener('touchstart', (e) => startDrag(e, sIdx, pIdx, 'hOut'));
+            editorControlsG.appendChild(line);
             editorControlsG.appendChild(ctrl);
           }
         });
       });
 
+      // 矢印ハンドル描画
       if (digitData.arrows) {
         digitData.arrows.forEach((arr, aIdx) => {
-          // 1. Text Arrow
-          const arrowText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-          arrowText.setAttribute('x', arr.x);
-          arrowText.setAttribute('y', arr.y);
-          arrowText.setAttribute('font-size', '14');
-          arrowText.setAttribute('font-weight', 'bold');
-          arrowText.setAttribute('font-family', 'sans-serif');
-          arrowText.setAttribute('fill', '#1e293b');
-          arrowText.setAttribute('text-anchor', 'middle');
-          arrowText.setAttribute('dominant-baseline', 'central');
-          arrowText.setAttribute('transform', `rotate(${arr.angle} ${arr.x} ${arr.y})`);
-          arrowText.setAttribute('pointer-events', 'none');
+          const arrowText = createSvgElement('text', {
+            x: arr.x, y: arr.y, 'font-size': '14', 'font-weight': 'bold', 'font-family': 'sans-serif',
+            fill: '#1e293b', 'text-anchor': 'middle', 'dominant-baseline': 'central',
+            transform: `rotate(${arr.angle} ${arr.x} ${arr.y})`, 'pointer-events': 'none'
+          });
           arrowText.textContent = '→';
           editorControlsG.appendChild(arrowText);
 
-          // 2. Position handle (Yellow Rect)
-          const posH = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-          posH.setAttribute('x', arr.x - 5);
-          posH.setAttribute('y', arr.y - 5);
-          posH.setAttribute('width', '10');
-          posH.setAttribute('height', '10');
-          posH.setAttribute('fill', 'rgba(234, 179, 8, 0.4)');
-          posH.setAttribute('stroke', '#ca8a04');
-          posH.setAttribute('stroke-width', '1.5');
-          posH.setAttribute('class', 'cursor-move');
+          const posH = createSvgElement('rect', {
+            x: arr.x - 5, y: arr.y - 5, width: '10', height: '10',
+            fill: 'rgba(234, 179, 8, 0.4)', stroke: '#ca8a04', 'stroke-width': '1.5', class: 'cursor-move'
+          });
           posH.addEventListener('mousedown', (e) => startDrag(e, null, aIdx, 'arrowPos'));
           posH.addEventListener('touchstart', (e) => startDrag(e, null, aIdx, 'arrowPos'));
           editorControlsG.appendChild(posH);
 
-          // 3. Angle handle (Line + Circle)
           const dist = 16;
           const rad = arr.angle * Math.PI / 180;
           const ax = arr.x + Math.cos(rad) * dist;
           const ay = arr.y + Math.sin(rad) * dist;
 
-          const angLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-          angLine.setAttribute('x1', arr.x); angLine.setAttribute('y1', arr.y);
-          angLine.setAttribute('x2', ax); angLine.setAttribute('y2', ay);
-          angLine.setAttribute('stroke', '#ca8a04'); angLine.setAttribute('stroke-width', '1');
-          editorControlsG.appendChild(angLine);
-
-          const angH = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-          angH.setAttribute('cx', ax); angH.setAttribute('cy', ay);
-          angH.setAttribute('r', '3.5');
-          angH.setAttribute('fill', '#fef08a');
-          angH.setAttribute('stroke', '#ca8a04');
-          angH.setAttribute('stroke-width', '1.5');
-          angH.setAttribute('class', 'cursor-move');
+          const angLine = createSvgElement('line', { x1: arr.x, y1: arr.y, x2: ax, y2: ay, stroke: '#ca8a04', 'stroke-width': '1' });
+          const angH = createSvgElement('circle', { cx: ax, cy: ay, r: '3.5', fill: '#fef08a', stroke: '#ca8a04', 'stroke-width': '1.5', class: 'cursor-move' });
           angH.addEventListener('mousedown', (e) => startDrag(e, null, aIdx, 'arrowAngle'));
           angH.addEventListener('touchstart', (e) => startDrag(e, null, aIdx, 'arrowAngle'));
+          editorControlsG.appendChild(angLine);
           editorControlsG.appendChild(angH);
         });
       }
@@ -530,11 +491,8 @@
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
       const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
-      let localX = ((clientX - rect.left) / rect.width) * 100;
-      let localY = ((clientY - rect.top) / rect.height) * 100;
-
-      localX = Math.round(Math.max(5, Math.min(95, localX)));
-      localY = Math.round(Math.max(5, Math.min(95, localY)));
+      let localX = Math.round(Math.max(5, Math.min(95, ((clientX - rect.left) / rect.width) * 100)));
+      let localY = Math.round(Math.max(5, Math.min(95, ((clientY - rect.top) / rect.height) * 100)));
 
       const digitData = digits[selectedDigit];
 
@@ -577,49 +535,33 @@
     window.addEventListener('touchmove', onDrag, { passive: false });
     window.addEventListener('touchend', endDrag);
 
+    // --- プレビュー生成 ---
     function renderWorksheet() {
       worksheetTable.innerHTML = '';
 
-      for (let r = 0; r < totalRows; r++) {
+      for (let r = 0; r < CONFIG.TOTAL_ROWS; r++) {
         const tr = document.createElement('tr');
         const config = rowsConfig[r];
 
-        digitOrder.forEach(num => {
+        CONFIG.DIGIT_ORDER.forEach(num => {
           const td = document.createElement('td');
           const innerDiv = document.createElement('div');
           innerDiv.className = 'cell-inner flex justify-center items-center';
 
-          const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-          svg.setAttribute('viewBox', '0 0 100 100');
-          svg.style.width = '100%';
-          svg.style.height = '100%';
-          svg.style.display = 'block';
+          const svg = createSvgElement('svg', { viewBox: '0 0 100 100', style: 'width: 100%; height: 100%; display: block;' });
 
           const scale = config.scale;
           const size = 100 * scale;
           const offset = (100 - size) / 2;
 
+          // 枠線・ガイド線
+          svg.appendChild(createSvgElement('rect', { x: offset, y: offset, width: size, height: size, fill: 'none', stroke: '#a4c2f4', 'stroke-width': '1.2' }));
           
-          const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-          rect.setAttribute('x', offset); rect.setAttribute('y', offset);
-          rect.setAttribute('width', size); rect.setAttribute('height', size);
-          rect.setAttribute('fill', 'none'); rect.setAttribute('stroke', '#a4c2f4');
-          rect.setAttribute('stroke-width', '1.2');
-          svg.appendChild(rect);
-        
-
           const dashLen = 2 * scale;
-          const hLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-          hLine.setAttribute('x1', offset); hLine.setAttribute('y1', 50); hLine.setAttribute('x2', offset + size); hLine.setAttribute('y2', 50);
-          hLine.setAttribute('stroke', '#cbd5e1'); hLine.setAttribute('stroke-width', '0.6'); hLine.setAttribute('stroke-dasharray', `${dashLen},${dashLen}`);
-          svg.appendChild(hLine);
+          svg.appendChild(createSvgElement('line', { x1: offset, y1: 50, x2: offset + size, y2: 50, stroke: '#cbd5e1', 'stroke-width': '0.6', 'stroke-dasharray': `${dashLen},${dashLen}` }));
+          svg.appendChild(createSvgElement('line', { x1: 50, y1: offset, x2: 50, y2: offset + size, stroke: '#cbd5e1', 'stroke-width': '0.6', 'stroke-dasharray': `${dashLen},${dashLen}` }));
 
-          const vLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-          vLine.setAttribute('x1', 50); vLine.setAttribute('y1', offset); vLine.setAttribute('x2', 50); vLine.setAttribute('y2', offset + size);
-          vLine.setAttribute('stroke', '#cbd5e1'); vLine.setAttribute('stroke-width', '0.6'); vLine.setAttribute('stroke-dasharray', `${dashLen},${dashLen}`);
-          svg.appendChild(vLine);
-
-          // Guide lines & Arrows only appear if it's NOT the last row of the block (5th, 10th, 15th rows)
+          // ブロックの最後の行(5, 10, 15段目)以外に文字と矢印を表示
           if ((r + 1) % 5 !== 0) {
             const dData = digits[num];
             if (dData && dData.strokes) {
@@ -629,39 +571,26 @@
               });
 
               dData.strokes.forEach(stroke => {
-                if (stroke.length === 0) return;
-                let d = `M ${mapPt(stroke[0]).x} ${mapPt(stroke[0]).y}`;
-                for (let i = 1; i < stroke.length; i++) {
-                  const prev = stroke[i - 1]; const curr = stroke[i];
-                  const cp1 = mapPt(prev.hOut ? prev.hOut : prev);
-                  const cp2 = mapPt(curr.hIn ? curr.hIn : curr);
-                  const end = mapPt(curr);
-                  d += ` C ${cp1.x} ${cp1.y}, ${cp2.x} ${cp2.y}, ${end.x} ${end.y}`;
+                const d = makePathData(stroke, mapPt);
+                if (d) {
+                  const strokePath = createSvgElement('path', {
+                    d, fill: 'none', stroke: '#475569',
+                    'stroke-width': 7 * config.traceScale,
+                    'stroke-linecap': 'round', 'stroke-linejoin': 'round',
+                    opacity: CONFIG.UNIFIED_OPACITY
+                  });
+                  svg.appendChild(strokePath);
                 }
-                const strokePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                strokePath.setAttribute('d', d);
-                strokePath.setAttribute('fill', 'none');
-                strokePath.setAttribute('stroke', '#475569');
-                strokePath.setAttribute('stroke-width', 7 * config.traceScale);
-                strokePath.setAttribute('stroke-linecap', 'round');
-                strokePath.setAttribute('stroke-linejoin', 'round');
-                strokePath.setAttribute('opacity', unifiedOpacity);
-                svg.appendChild(strokePath);
               });
 
-              if (r==0 && dData.arrows) {
+              if (r === 0 && dData.arrows) {
                 dData.arrows.forEach(arr => {
                   const pt = mapPt(arr);
-                  const arrowText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                  arrowText.setAttribute('x', pt.x);
-                  arrowText.setAttribute('y', pt.y);
-                  arrowText.setAttribute('font-size', `${14 * scale}`);
-                  arrowText.setAttribute('font-weight', 'bold');
-                  arrowText.setAttribute('font-family', 'sans-serif');
-                  arrowText.setAttribute('fill', '#1e293b');
-                  arrowText.setAttribute('text-anchor', 'middle');
-                  arrowText.setAttribute('dominant-baseline', 'central');
-                  arrowText.setAttribute('transform', `rotate(${arr.angle} ${pt.x} ${pt.y})`);
+                  const arrowText = createSvgElement('text', {
+                    x: pt.x, y: pt.y, 'font-size': `${14 * scale}`, 'font-weight': 'bold',
+                    'font-family': 'sans-serif', fill: '#1e293b', 'text-anchor': 'middle',
+                    'dominant-baseline': 'central', transform: `rotate(${arr.angle} ${pt.x} ${pt.y})`
+                  });
                   arrowText.textContent = '→';
                   svg.appendChild(arrowText);
                 });
@@ -678,6 +607,7 @@
       }
     }
 
+    // --- 高解像度PNG保存 (Canvas描画) ---
     function generateHighResPNG() {
       const canvas = document.getElementById('export-canvas');
       const ctx = canvas.getContext('2d');
@@ -687,21 +617,24 @@
       canvas.width = canvasWidth;
       canvas.height = canvasHeight;
 
+      // 背景色
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
+      // タイトル・サブタイトル・ヘッダー（共通テキスト定数を利用）
       ctx.fillStyle = '#1e293b';
       ctx.font = 'bold 85px "BIZ UDPGothic", "Hiragino Sans", "Meiryo", sans-serif';
-      ctx.fillText('すうじの れんしゅうちょう', 120, 200);
+      ctx.fillText(CONFIG.TITLE, 120, 200);
 
       ctx.fillStyle = '#64748b';
       ctx.font = 'bold 32px "BIZ UDPGothic", "Hiragino Sans", sans-serif';
-      ctx.fillText('ハミでないように　ていねいに なぞって、きれいな すうじを かいてみよう！', 120, 260);
+      ctx.fillText(CONFIG.SUBTITLE, 120, 260);
 
       ctx.fillStyle = '#334155';
       ctx.font = 'bold 36px "BIZ UDPGothic", sans-serif';
-      ctx.fillText('______ ねん ______ くみ', 1350, 240);
-      ctx.fillText('なまえ（　　　　　　　　　　　　　　　）', 1800, 240);
+      ctx.fillText(CONFIG.CLASS_LABEL, 1350, 240);
+      ctx.fillText(CONFIG.NAME_LABEL, 1800, 240);
+
       ctx.beginPath();
       ctx.strokeStyle = '#1e293b';
       ctx.lineWidth = 4;
@@ -715,6 +648,7 @@
       const colWidth = gridWidth / 11;
       const rowHeight = colWidth;
 
+      // グリッド線描画
       const largeRows = 5;
       for (let r = 0; r <= largeRows; r++) {
         ctx.beginPath();
@@ -733,7 +667,7 @@
         ctx.stroke();
       }
 
-      for (let r = largeRows; r < totalRows; r++) {
+      for (let r = largeRows; r < CONFIG.TOTAL_ROWS; r++) {
         const config = rowsConfig[r];
         for (let c = 0; c < 11; c++) {
           const cellSize = colWidth * config.scale;
@@ -746,7 +680,8 @@
         }
       }
 
-      for (let r = 0; r < totalRows; r++) {
+      // セル内描画
+      for (let r = 0; r < CONFIG.TOTAL_ROWS; r++) {
         const config = rowsConfig[r];
         const cellSize = colWidth * config.scale;
         
@@ -767,7 +702,7 @@
           ctx.setLineDash([]);
 
           if ((r + 1) % 5 !== 0) {
-            const digitChar = digitOrder[c];
+            const digitChar = CONFIG.DIGIT_ORDER[c];
             const digitData = digits[digitChar];
 
             if (digitData && digitData.strokes) {
@@ -777,7 +712,7 @@
               });
 
               ctx.save();
-              ctx.globalAlpha = unifiedOpacity;
+              ctx.globalAlpha = CONFIG.UNIFIED_OPACITY;
               ctx.strokeStyle = '#475569';
               ctx.lineWidth = 15 * config.traceScale;
               ctx.lineCap = 'round';
@@ -799,8 +734,8 @@
               });
               ctx.restore();
 
-              // Draw canvas arrows
-              if (r==0 && digitData.arrows) {
+              // 矢印の描画
+              if (r === 0 && digitData.arrows) {
                 ctx.fillStyle = '#1e293b';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
@@ -821,28 +756,30 @@
         }
       }
 
+      // 画像のダウンロード実行
       const dataURL = canvas.toDataURL('image/png');
       const downloadLink = document.createElement('a');
       downloadLink.href = dataURL;
-      downloadLink.download = 'すうじのれんしゅうちょう_A4_15段.png';
+      downloadLink.download = `${CONFIG.TITLE}_A4_15段.png`;
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);
     }
 
-    resetAllBtn.addEventListener('click', () => {
-      digits = deepClone(INITIAL_DIGITS);
+    // --- 各種ボタンイベント ---
+    document.getElementById('reset-all-btn').addEventListener('click', () => {
+      digits = structuredClone(INITIAL_DIGITS);
       renderEditor();
       renderWorksheet();
       showToast('編集した書体を初期状態にリセットしました！', '🔄');
     });
 
-    downloadPngBtn.addEventListener('click', () => {
+    document.getElementById('download-png-btn').addEventListener('click', () => {
       generateHighResPNG();
       showToast('練習シートのPNG画像を保存しました！', '💾');
     });
 
-    exportJsonBtn.addEventListener('click', () => {
+    document.getElementById('export-json-btn').addEventListener('click', () => {
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(digits, null, 2));
       const downloadAnchorNode = document.createElement('a');
       downloadAnchorNode.setAttribute("href", dataStr);
@@ -853,7 +790,7 @@
       showToast('ベジェデータをエクスポートしました！', '📤');
     });
 
-    importJsonInput.addEventListener('change', (event) => {
+    document.getElementById('import-json-input').addEventListener('change', (event) => {
       const file = event.target.files[0];
       if (!file) return;
       const reader = new FileReader();
@@ -861,8 +798,8 @@
         try {
           const importedData = JSON.parse(e.target.result);
           if (importedData['1'] && importedData['2']) {
-            if (!importedData['=']) importedData['='] = deepClone(INITIAL_DIGITS['=']);
-            // Migrate old data missing arrows
+            if (!importedData['=']) importedData['='] = structuredClone(INITIAL_DIGITS['=']);
+            // 矢印データがない古いデータの補正
             Object.keys(importedData).forEach(key => {
               if (importedData[key] && !importedData[key].arrows) {
                 importedData[key].arrows = importedData[key].strokes.map(s => ({ x: s[0].x, y: s[0].y, angle: 0 }));
@@ -871,14 +808,14 @@
             digits = importedData;
             renderEditor();
             renderWorksheet();
-            showToast('📥 データを読み込みました！', '✅');
+            showToast('データを読み込みました！', '✅');
           } else {
             showToast('無効なデータ形式です。', '⚠️');
           }
         } catch (err) {
           showToast('ファイルの読み込みに失敗しました。', '⚠️');
         }
-        importJsonInput.value = '';
+        event.target.value = '';
       };
       reader.readAsText(file);
     });
@@ -900,7 +837,9 @@
       }, 3000);
     }
 
+    // 初期化処理
     window.onload = function() {
+      initTexts();
       createDigitTabs();
       renderEditor();
       renderWorksheet();
