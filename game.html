@@ -25,21 +25,43 @@
       animation: shake 0.25s ease-in-out;
     }
 
-    /* 赤いピカッとフラッシュ */
+    /* 赤いフラッシュ */
     #flash-overlay {
       pointer-events: none;
       transition: opacity 0.15s ease-out;
     }
+
+    /* フィーバー時の背景変化アニメーション */
+    .fever-bg {
+      background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 50%, #fbcfe8 100%) !important;
+    }
+
+    /* 横スクロールバーのカスタム装飾 */
+    .custom-scrollbar::-webkit-scrollbar {
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(226, 232, 240, 0.6);
+      border-radius: 10px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #a5b4fc;
+      border-radius: 10px;
+    }
   </style>
 </head>
-<body class="bg-amber-50 text-slate-800 min-h-screen flex flex-col items-center justify-between p-4 relative overflow-hidden">
+
+<body id="bg-body" class="bg-amber-50 text-slate-800 min-h-screen flex flex-col items-center justify-between p-3 sm:p-4 relative overflow-hidden transition-colors duration-500">
 
   <!-- 赤いフラッシュ用オーバーレイ -->
   <div id="flash-overlay" class="fixed inset-0 bg-red-500/30 opacity-0 z-50"></div>
 
+  <!-- 紙吹雪用パーティクルCanvas -->
+  <canvas id="particle-canvas" class="fixed inset-0 pointer-events-none z-40"></canvas>
+
   <!-- ヘッダー / ステータス表示 -->
-  <header class="w-full max-w-md bg-white rounded-3xl p-4 shadow-xl border-4 border-yellow-300 flex justify-between items-center z-10">
-    <div class="flex items-center gap-3">
+  <header class="w-full max-w-md bg-white/90 backdrop-blur-sm rounded-3xl p-3 sm:p-4 shadow-xl border-4 border-yellow-300 flex justify-between items-center z-10">
+    <div class="flex items-center gap-2 sm:gap-3">
       <div class="bg-yellow-400 text-yellow-900 font-black px-3 py-1.5 rounded-2xl text-xs flex flex-col items-center shadow-inner">
         <span>LV</span>
         <span id="level-val" class="text-xl leading-none">1</span>
@@ -47,7 +69,7 @@
       <div>
         <div class="text-xs font-bold text-slate-400">COMBO</div>
         <div id="combo-val" class="text-2xl font-black text-orange-500 flex items-center gap-1">
-          0 <span id="combo-badge" class="hidden text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full border border-orange-300">UP!</span>
+          0 <span id="fever-badge" class="hidden text-xs bg-pink-500 text-white font-extrabold px-2 py-0.5 rounded-full shadow animate-bounce">FEVER!</span>
         </div>
       </div>
     </div>
@@ -58,10 +80,20 @@
   </header>
 
   <!-- メインキャンバスエリア -->
-  <main id="game-container" class="relative w-full max-w-md aspect-square my-auto flex items-center justify-center z-10">
+  <main id="game-container" class="relative w-full max-w-md aspect-square my-2 flex items-center justify-center z-10">
     <!-- 画数プログレス表示 -->
-    <div id="stroke-indicator" class="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full border-2 border-indigo-200 text-xs font-bold text-indigo-600 z-20 shadow-md">
+    <div id="stroke-indicator" class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full border-2 border-indigo-200 text-xs font-bold text-indigo-600 z-20 shadow-md">
       画数: <span id="current-stroke-val">1</span> / <span id="total-strokes-val">1</span>
+    </div>
+
+    <!-- リアルタイム判定ステータス (凡例アイコン付き) -->
+    <div class="absolute top-3 right-3 flex gap-1 z-20">
+      <div class="bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-full border-2 border-emerald-200 text-xs font-bold text-emerald-600 shadow-md flex items-center gap-1" title="お手本のカバー率">
+        <span>🎯</span><span id="coverage-val">0</span>%
+      </div>
+      <div class="bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-full border-2 border-rose-200 text-xs font-bold text-rose-500 shadow-md flex items-center gap-1" title="はみ出し減点">
+        <span>⚠️</span>-<span id="penalty-val">0</span>
+      </div>
     </div>
 
     <canvas id="game-canvas" class="w-full h-full bg-white rounded-3xl border-4 border-indigo-200 shadow-2xl touch-none cursor-crosshair"></canvas>
@@ -71,8 +103,8 @@
       <div class="text-5xl mb-2">✍️✨</div>
       <h2 id="overlay-title" class="text-2xl font-black mb-2 text-indigo-600">文字なぞりチャレンジ！</h2>
       <p id="overlay-desc" class="text-xs text-slate-500 mb-6 leading-relaxed font-bold">
-        線をはみ出さないように丁寧になぞろう！<br>
-        コンボが続くと自動でレベル＆スコア倍率アップ！
+        お手本を最後まで丁寧になぞろう！<br>
+        コンボが続くとレベル＆スコア倍率アップ！
       </p>
       <button id="start-btn" class="px-8 py-3.5 bg-gradient-to-r from-orange-400 to-amber-500 hover:from-orange-500 hover:to-amber-600 text-white font-black text-lg rounded-2xl shadow-lg shadow-orange-300/50 transform active:scale-95 transition-all">
         ゲームスタート！
@@ -80,11 +112,24 @@
     </div>
   </main>
 
-  <!-- フッター / ステータス & JSON読込 -->
+  <!-- フッター / 履歴 ＆ ステータス ＆ JSON読込 -->
   <footer class="w-full max-w-md flex flex-col gap-2 z-10">
-    <div class="bg-white p-3.5 rounded-2xl border-2 border-indigo-100 shadow-md flex justify-between items-center text-xs font-bold">
-      <span id="status-msg" class="text-slate-500">文字をなぞってね！</span>
-      <label for="import-json" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-xl cursor-pointer transition-all border border-indigo-200 flex items-center gap-1">
+    
+    <!-- 過去ログ・評価履歴（横スクロール） -->
+    <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-2.5 border-2 border-indigo-100 shadow-sm flex flex-col gap-1.5">
+      <div class="flex justify-between items-center px-1 text-[10px] font-bold text-slate-400">
+        <span>📜 なぞり結果の履歴</span>
+        <span>凡例: 🎯カバー率 / ⚠️減点</span>
+      </div>
+      <div id="history-container" class="flex gap-2 overflow-x-auto custom-scrollbar pb-1.5 min-h-[58px] items-center">
+        <span id="history-empty" class="text-xs text-slate-400 font-bold w-full text-center py-2">クリアするとここに文字ごとの評価履歴が流れます</span>
+      </div>
+    </div>
+
+    <!-- メッセージ & JSON読み込みボタン -->
+    <div class="bg-white/90 backdrop-blur-sm p-3 rounded-2xl border-2 border-indigo-100 shadow-md flex justify-between items-center text-xs font-bold">
+      <span id="status-msg" class="text-slate-500 truncate mr-2">文字をなぞってね！</span>
+      <label for="import-json" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-xl cursor-pointer transition-all border border-indigo-200 flex items-center gap-1 shrink-0">
         📂 JSON読込
       </label>
       <input type="file" id="import-json" accept=".json" class="hidden">
@@ -114,23 +159,28 @@
     let level = 1;
     let score = 0;
     let combo = 0;
-    let currentScore = 100;
+    let penaltyScore = 0; // はみ出し減点
     let currentChar = '1';
     let previousChar = '';
-    let currentStrokeIndex = 0; // 現在なぞっている画数（0始まり）
+    let currentStrokeIndex = 0;
     let isDrawing = false;
     
-    let currentPath = [];        // 現在進行中のストローク
-    let completedPaths = [];    // 書き終わった画数の保存
+    let currentPath = [];
+    let completedPaths = [];
 
-    // エフェクト用インターバル管理
-    let isFlashing = false;
+    let targetSamplePoints = []; // お手本サンプル点
+    let strokeCoverageList = []; // 各画ごとのカバー率記録
 
     // Canvas要素
     const canvas = document.getElementById('game-canvas');
     const ctx = canvas.getContext('2d');
     const hitCanvas = document.createElement('canvas');
     const hitCtx = hitCanvas.getContext('2d');
+    
+    // パーティクル用
+    const pCanvas = document.getElementById('particle-canvas');
+    const pCtx = pCanvas.getContext('2d');
+    let particles = [];
 
     function resizeCanvas() {
       const rect = canvas.getBoundingClientRect();
@@ -138,10 +188,49 @@
       canvas.height = rect.height * window.devicePixelRatio;
       hitCanvas.width = canvas.width;
       hitCanvas.height = canvas.height;
+
+      pCanvas.width = window.innerWidth;
+      pCanvas.height = window.innerHeight;
     }
     window.addEventListener('resize', resizeCanvas);
 
-    // 2. ベジェ描画補助
+    // 2. 難易度パラメータ
+    function getDifficultyParams() {
+      const canvasSize = canvas.width;
+      const scalePercent = Math.max(0.28, 0.85 - (level - 1) * 0.085);
+      const scale = canvasSize * scalePercent;
+      const offsetX = (canvasSize - scale) / 2;
+      const offsetY = (canvasSize - scale) / 2;
+      const guideLineWidth = Math.max(14, 65 - (level - 1) * 6.5) * (canvasSize / 400);
+
+      return { scale, offsetX, offsetY, guideLineWidth };
+    }
+
+    // 3. ベジェサンプリング
+    function prepareStrokeSamplePoints(stroke, scale, offsetX, offsetY) {
+      const points = [];
+      if (!stroke || stroke.length < 2) return points;
+
+      for (let i = 1; i < stroke.length; i++) {
+        const prev = stroke[i - 1];
+        const curr = stroke[i];
+        
+        const p0 = { x: offsetX + (prev.x / 100) * scale, y: offsetY + (prev.y / 100) * scale };
+        const p1 = { x: offsetX + ((prev.hOut ? prev.hOut.x : prev.x) / 100) * scale, y: offsetY + ((prev.hOut ? prev.hOut.y : prev.y) / 100) * scale };
+        const p2 = { x: offsetX + ((curr.hIn ? curr.hIn.x : curr.x) / 100) * scale, y: offsetY + ((curr.hIn ? curr.hIn.y : curr.y) / 100) * scale };
+        const p3 = { x: offsetX + (curr.x / 100) * scale, y: offsetY + (curr.y / 100) * scale };
+
+        const steps = 25;
+        for (let t = 0; t <= steps; t++) {
+          const u = t / steps;
+          const cx = Math.pow(1 - u, 3) * p0.x + 3 * Math.pow(1 - u, 2) * u * p1.x + 3 * (1 - u) * Math.pow(u, 2) * p2.x + Math.pow(u, 3) * p3.x;
+          const cy = Math.pow(1 - u, 3) * p0.y + 3 * Math.pow(1 - u, 2) * u * p1.y + 3 * (1 - u) * Math.pow(u, 2) * p2.y + Math.pow(u, 3) * p3.y;
+          points.push({ x: cx, y: cy, hit: false });
+        }
+      }
+      return points;
+    }
+
     function drawStroke(targetCtx, stroke, scale, offsetX, offsetY, lineWidth, strokeColor) {
       if (!stroke || stroke.length === 0) return;
       targetCtx.beginPath();
@@ -167,22 +256,6 @@
       targetCtx.stroke();
     }
 
-    // 難易度パラメータ
-    function getDifficultyParams() {
-      const canvasSize = canvas.width;
-      // レベルが上がるとスケールが小さくなる (80% -> 最小35%)
-      const scalePercent = Math.max(0.35, 0.80 - (level - 1) * 0.04);
-      const scale = canvasSize * scalePercent;
-      const offsetX = (canvasSize - scale) / 2;
-      const offsetY = (canvasSize - scale) / 2;
-
-      // レベルアップで判定の線が細くなる
-      const guideLineWidth = Math.max(12, 58 - (level - 1) * 3.5) * (canvasSize / 400);
-
-      return { scale, offsetX, offsetY, guideLineWidth };
-    }
-
-    // 3. 次の文字をランダムに選出（連続重複を防ぐ）
     function nextRandomChar() {
       const candidates = ALL_CHARS.filter(c => c !== previousChar);
       const picked = candidates[Math.floor(Math.random() * candidates.length)];
@@ -191,7 +264,20 @@
       currentStrokeIndex = 0;
       completedPaths = [];
       currentPath = [];
-      currentScore = 100;
+      penaltyScore = 0;
+      strokeCoverageList = [];
+      initCurrentStrokeData();
+    }
+
+    function initCurrentStrokeData() {
+      const digitData = fontData[currentChar];
+      if (!digitData) return;
+      const { scale, offsetX, offsetY } = getDifficultyParams();
+      const activeStroke = digitData.strokes[currentStrokeIndex];
+      targetSamplePoints = prepareStrokeSamplePoints(activeStroke, scale, offsetX, offsetY);
+      
+      document.getElementById('coverage-val').textContent = '0';
+      document.getElementById('penalty-val').textContent = Math.round(penaltyScore);
     }
 
     // 4. メイン描画
@@ -202,14 +288,12 @@
       const { scale, offsetX, offsetY, guideLineWidth } = getDifficultyParams();
       const totalStrokes = digitData.strokes.length;
 
-      // インジケーター更新
       document.getElementById('current-stroke-val').textContent = currentStrokeIndex + 1;
       document.getElementById('total-strokes-val').textContent = totalStrokes;
 
-      // --- 画面描画 ---
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // お手本ガイド文字（全画数を半透明描画、現在の画数を強調）
+      // お手本ガイド
       digitData.strokes.forEach((stroke, idx) => {
         const isCurrent = idx === currentStrokeIndex;
         const color = isCurrent ? 'rgba(99, 102, 241, 0.25)' : 'rgba(203, 213, 225, 0.2)';
@@ -218,15 +302,15 @@
         drawStroke(ctx, stroke, scale, offsetX, offsetY, 3, coreColor);
       });
 
-      // 書き終わった画数を描画（しっかり固定表示）
+      // 完了した画数
       completedPaths.forEach(path => drawPathOnContext(ctx, path, '#6366f1'));
 
-      // 現在なぞっている画数を描画
+      // 進行中の画数
       if (currentPath.length > 1) {
         drawPathOnContext(ctx, currentPath, '#38bdf8');
       }
 
-      // --- 当たり判定マスク作成 (裏キャンバス) ---
+      // 当たり判定マスク
       hitCtx.clearRect(0, 0, hitCanvas.width, hitCanvas.height);
       const activeStroke = digitData.strokes[currentStrokeIndex];
       if (activeStroke) {
@@ -248,8 +332,11 @@
       targetCtx.stroke();
     }
 
-    // 5. はみ出し判定 ＆ 演出（バイブレーション・画面振動・赤フラッシュ）
-    function checkPoint(x, y) {
+    // 5. なぞり判定
+    function processTracePoint(x, y) {
+      const { guideLineWidth } = getDifficultyParams();
+
+      // はみ出し判定
       let isOut = false;
       if (x < 0 || x >= hitCanvas.width || y < 0 || y >= hitCanvas.height) {
         isOut = true;
@@ -259,43 +346,42 @@
       }
 
       if (isOut) {
-        deductScore();
+        penaltyScore += 1.5;
+        document.getElementById('penalty-val').textContent = Math.round(penaltyScore);
         triggerOutEffects();
       }
-    }
 
-    function deductScore() {
-      currentScore = Math.max(0, currentScore - 1.2);
-      document.getElementById('status-msg').textContent = '⚠️ はみ出しています！';
-      document.getElementById('status-msg').className = 'text-rose-500 font-bold';
+      // カバー率判定
+      const hitRadius = guideLineWidth * 0.85;
+      let hitCount = 0;
+      targetSamplePoints.forEach(pt => {
+        if (!pt.hit) {
+          const dist = Math.hypot(pt.x - x, pt.y - y);
+          if (dist <= hitRadius) pt.hit = true;
+        }
+        if (pt.hit) hitCount++;
+      });
+
+      const coveragePercent = targetSamplePoints.length > 0 
+        ? Math.floor((hitCount / targetSamplePoints.length) * 100) 
+        : 0;
+      
+      document.getElementById('coverage-val').textContent = coveragePercent;
     }
 
     function triggerOutEffects() {
-      // スマホバイブレーション (対応端末)
-      if (navigator.vibrate) {
-        navigator.vibrate(40);
-      }
+      if (navigator.vibrate) navigator.vibrate(40);
 
-      // 視覚演出（連続発生を抑制）
-      if (!isFlashing) {
-        isFlashing = true;
+      const container = document.getElementById('game-container');
+      container.classList.add('animate-shake');
+      setTimeout(() => container.classList.remove('animate-shake'), 250);
 
-        // 画面シェイク
-        const container = document.getElementById('game-container');
-        container.classList.add('animate-shake');
-        setTimeout(() => container.classList.remove('animate-shake'), 250);
-
-        // 赤いピカッとフラッシュ
-        const flash = document.getElementById('flash-overlay');
-        flash.style.opacity = '1';
-        setTimeout(() => {
-          flash.style.opacity = '0';
-          isFlashing = false;
-        }, 150);
-      }
+      const flash = document.getElementById('flash-overlay');
+      flash.style.opacity = '1';
+      setTimeout(() => flash.style.opacity = '0', 120);
     }
 
-    // 6. 入力イベント処理
+    // 6. 入力ハンドラ
     function getCanvasCoords(e) {
       const rect = canvas.getBoundingClientRect();
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -311,7 +397,7 @@
       currentPath = [];
       const coords = getCanvasCoords(e);
       currentPath.push(coords);
-      checkPoint(coords.x, coords.y);
+      processTracePoint(coords.x, coords.y);
       render();
     }
 
@@ -319,7 +405,7 @@
       if (!isDrawing) return;
       const coords = getCanvasCoords(e);
       currentPath.push(coords);
-      checkPoint(coords.x, coords.y);
+      processTracePoint(coords.x, coords.y);
       render();
     }
 
@@ -332,50 +418,62 @@
       }
       currentPath = [];
 
+      const hitCount = targetSamplePoints.filter(p => p.hit).length;
+      const coverage = targetSamplePoints.length > 0 ? (hitCount / targetSamplePoints.length) * 100 : 0;
+      strokeCoverageList.push(Math.floor(coverage));
+
+      if (coverage < 70) {
+        document.getElementById('status-msg').textContent = `❌ 端折らず最後までなぞってね！ (カバー率:${Math.floor(coverage)}%)`;
+        document.getElementById('status-msg').className = 'text-rose-500 font-bold';
+        evaluateRound(false);
+        return;
+      }
+
       const digitData = fontData[currentChar];
       const totalStrokes = digitData.strokes.length;
 
-      // まだ描いていない画数があれば次の画へ
       if (currentStrokeIndex + 1 < totalStrokes) {
         currentStrokeIndex++;
-        document.getElementById('status-msg').textContent = `つぎの画（${currentStrokeIndex + 1}画目）をかこう！`;
+        initCurrentStrokeData();
+        document.getElementById('status-msg').textContent = `✨ つぎの画（${currentStrokeIndex + 1}画目）をかこう！`;
         document.getElementById('status-msg').className = 'text-indigo-600 font-bold';
         render();
       } else {
-        // すべての画数が完了したら評価判定へ
-        evaluateRound();
+        evaluateRound(true);
       }
     }
 
-    // 7. 判定とコンボ・自動レベルアップ
-    function evaluateRound() {
-      const finalRoundScore = Math.round(currentScore);
+    // 7. ラウンド評価 & 履歴追加
+    function evaluateRound(isSuccess) {
+      const avgCoverage = strokeCoverageList.length > 0 
+        ? Math.round(strokeCoverageList.reduce((a, b) => a + b, 0) / strokeCoverageList.length)
+        : 0;
+      
+      const roundedPenalty = Math.round(penaltyScore);
 
-      if (finalRoundScore >= 75) {
-        // クリア成功！
+      if (isSuccess) {
+        const finalRoundScore = Math.max(0, Math.round(100 - penaltyScore));
         combo++;
-        
-        // 3コンボごとに自動的にレベルアップ！
-        let levelUpOccurred = false;
-        if (combo % 3 === 0) {
-          level++;
-          levelUpOccurred = true;
-        }
 
-        // スコア計算 (レベルが上がると獲得倍率もアップ)
-        const multiplier = 1 + (level - 1) * 0.5;
-        const bonus = Math.round(combo * 30 * multiplier);
+        if (combo % 2 === 0) level++;
+
+        const multiplier = 1 + (level - 1) * 0.6;
+        const bonus = Math.round(combo * 40 * multiplier);
         const roundTotal = Math.round(finalRoundScore * multiplier) + bonus;
         score += roundTotal;
 
-        const msg = levelUpOccurred 
-          ? `🎉 レベルUP (LV.${level})！ +${roundTotal}pt` 
-          : `✨ クリア！ (精度:${finalRoundScore}点 +${roundTotal}pt)`;
-        
-        document.getElementById('status-msg').textContent = msg;
-        document.getElementById('status-msg').className = 'text-emerald-500 font-bold';
+        spawnConfetti();
 
-        // 次の文字を設定して切り替え
+        // 履歴に追加 (クリア成功)
+        addHistoryCard(currentChar, avgCoverage, roundedPenalty, finalRoundScore, true);
+
+        const msg = combo % 2 === 0 
+          ? `🎉 SPEED UP! (LV.${level}) +${roundTotal}pt` 
+          : `✨ ナイス！ (精度:${finalRoundScore}点 +${roundTotal}pt)`;
+
+        document.getElementById('status-msg').textContent = msg;
+        document.getElementById('status-msg').className = 'text-emerald-500 font-extrabold';
+
         setTimeout(() => {
           nextRandomChar();
           document.getElementById('status-msg').textContent = '文字をなぞってね！';
@@ -384,24 +482,53 @@
         }, 800);
 
       } else {
-        // 失敗（コンボリセット）
         combo = 0;
-        document.getElementById('status-msg').textContent = `❌ もう一度チャレンジ！ (精度:${finalRoundScore}点)`;
-        document.getElementById('status-msg').className = 'text-rose-500 font-bold';
+        // 履歴に追加 (失敗)
+        addHistoryCard(currentChar, avgCoverage, roundedPenalty, 0, false);
 
         setTimeout(() => {
-          // 同じ文字をリトライ
           currentStrokeIndex = 0;
           completedPaths = [];
           currentPath = [];
-          currentScore = 100;
-          document.getElementById('status-msg').textContent = '文字をなぞってね！';
-          document.getElementById('status-msg').className = 'text-slate-500';
+          penaltyScore = 0;
+          strokeCoverageList = [];
+          initCurrentStrokeData();
           render();
-        }, 1000);
+        }, 1200);
       }
 
       updateUI();
+    }
+
+    // 8. 横スクロール履歴カードの追加
+    function addHistoryCard(char, coverage, penalty, scoreVal, isSuccess) {
+      const emptyMsg = document.getElementById('history-empty');
+      if (emptyMsg) emptyMsg.remove();
+
+      const container = document.getElementById('history-container');
+      const card = document.createElement('div');
+
+      const bgClass = isSuccess ? 'bg-indigo-50 border-indigo-200' : 'bg-rose-50 border-rose-200';
+      const textClass = isSuccess ? 'text-indigo-600' : 'text-rose-500';
+
+      card.className = `${bgClass} border-2 rounded-xl px-2.5 py-1.5 flex items-center gap-2 shrink-0 shadow-sm transition-all duration-300 animate-fade-in`;
+      card.innerHTML = `
+        <div class="text-xl font-black ${textClass} w-6 text-center">${char}</div>
+        <div class="flex flex-col text-[10px] font-bold leading-tight">
+          <div class="flex items-center gap-1 text-slate-600">
+            <span>🎯</span><span>${coverage}%</span>
+          </div>
+          <div class="flex items-center gap-1 text-rose-500">
+            <span>⚠️</span><span>-${penalty}</span>
+          </div>
+        </div>
+        <div class="text-xs font-black ${textClass} border-l border-slate-200 pl-2">
+          ${isSuccess ? scoreVal + '点' : 'FAIL'}
+        </div>
+      `;
+
+      // 新しい履歴を一番左（先頭）に追加
+      container.insertBefore(card, container.firstChild);
     }
 
     function updateUI() {
@@ -409,13 +536,62 @@
       document.getElementById('combo-val').childNodes[0].textContent = combo + ' ';
       document.getElementById('score-val').textContent = score;
 
-      const badge = document.getElementById('combo-badge');
-      if (combo > 0 && combo % 3 === 0) {
-        badge.classList.remove('hidden');
+      const body = document.getElementById('bg-body');
+      const feverBadge = document.getElementById('fever-badge');
+
+      if (combo >= 3) {
+        body.classList.add('fever-bg');
+        feverBadge.classList.remove('hidden');
       } else {
-        badge.classList.add('hidden');
+        body.classList.remove('fever-bg');
+        feverBadge.classList.add('hidden');
       }
     }
+
+    // 9. パーティクル
+    function spawnConfetti() {
+      const colors = ['#f43f5e', '#3b82f6', '#10b981', '#eab308', '#a855f7', '#ec4899'];
+      for (let i = 0; i < 40; i++) {
+        particles.push({
+          x: pCanvas.width / 2 + (Math.random() - 0.5) * 100,
+          y: pCanvas.height / 2 + (Math.random() - 0.5) * 100,
+          vx: (Math.random() - 0.5) * 14,
+          vy: (Math.random() - 0.8) * 16,
+          size: Math.random() * 8 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          rotation: Math.random() * 360,
+          vRot: (Math.random() - 0.5) * 10,
+          life: 1.0
+        });
+      }
+    }
+
+    function updateParticles() {
+      pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.4;
+        p.rotation += p.vRot;
+        p.life -= 0.02;
+
+        if (p.life <= 0) {
+          particles.splice(i, 1);
+          continue;
+        }
+
+        pCtx.save();
+        pCtx.translate(p.x, p.y);
+        pCtx.rotate((p.rotation * Math.PI) / 180);
+        pCtx.fillStyle = p.color;
+        pCtx.globalAlpha = p.life;
+        pCtx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+        pCtx.restore();
+      }
+      requestAnimationFrame(updateParticles);
+    }
+    requestAnimationFrame(updateParticles);
 
     // イベント登録
     canvas.addEventListener('mousedown', startDraw);
@@ -433,6 +609,7 @@
       score = 0;
       combo = 0;
       previousChar = '';
+      document.getElementById('history-container').innerHTML = '<span id="history-empty" class="text-xs text-slate-400 font-bold w-full text-center py-2">クリアするとここに文字ごとの評価履歴が流れます</span>';
       nextRandomChar();
       updateUI();
       resizeCanvas();
