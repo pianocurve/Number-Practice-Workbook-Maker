@@ -1,18 +1,22 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>数字の練習帳メーカー</title>
-  <!-- ================= OGP設定 (noteやSNSで画像を表示させる設定) ================= -->
-    <meta property="og:title" content="数字の練習帳メーカー">
-    <meta property="og:description" content="数字の練習帳を作る。数字はベジェハンドルで形を作り、書き順矢印を配置して高画質なA4シートを作成">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://pianocurve.github.io/Number-Practice-Workbook-Maker/index.html">
-    <meta property="og:image" content="https://pianocurve.github.io/Number-Practice-Workbook-Maker/ogp-image.jpg">
-    <meta name="twitter:card" content="summary_large_image">
+  <!-- OGP設定 -->
+  <meta property="og:title" content="数字の練習帳メーカー">
+  <meta property="og:description" content="数字の練習帳を作る。数字はベジェハンドルで形を作り、書き順矢印を配置して高画質なA4シートを作成">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://pianocurve.github.io/Number-Practice-Workbook-Maker/index.html">
+  <meta property="og:image" content="https://pianocurve.github.io/Number-Practice-Workbook-Maker/ogp-image.jpg">
+  <meta name="twitter:card" content="summary_large_image">
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Inter:wght@400;600&display=swap"
+    rel="stylesheet">
+
   <style>
     body {
       font-family: 'BIZ UDPGothic', 'Hiragino Sans', 'Meiryo', sans-serif;
@@ -25,40 +29,11 @@
       height: auto;
       aspect-ratio: 210 / 297;
       background-color: #ffffff;
-      padding: 12mm 10mm;
+      padding: 0;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
       margin: 0 auto;
       box-sizing: border-box;
       position: relative;
-    }
-
-    .grid-table {
-      width: 100%;
-      border-collapse: collapse;
-      table-layout: fixed;
-    }
-
-    .grid-table td {
-      width: calc(100% / 11);
-      position: relative;
-      padding: 0;
-      margin: 0;
-      box-sizing: border-box;
-    }
-
-    /* 1:1 正方形セル */
-    .grid-table td::after {
-      content: "";
-      display: block;
-      padding-bottom: 100%;
-    }
-
-    .cell-inner {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
     }
 
     .editor-canvas-container {
@@ -69,7 +44,7 @@
       background-color: #ffffff;
       border: 2px solid #e2e8f0;
       border-radius: 16px;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
     }
 
     .tab-btn.active {
@@ -79,6 +54,7 @@
     }
   </style>
 </head>
+
 <body class="min-h-screen flex flex-col text-slate-800">
 
   <header class="bg-indigo-900 text-white py-4 px-6 shadow-md">
@@ -91,25 +67,29 @@
         </div>
       </div>
       <div class="flex items-center gap-3">
-        <button id="reset-all-btn" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 active:scale-95 text-xs font-semibold rounded-lg transition-all border border-slate-700 flex items-center gap-1">
+        <button id="reset-all-btn"
+          class="px-4 py-2 bg-slate-800 hover:bg-slate-700 active:scale-95 text-xs font-semibold rounded-lg transition-all border border-slate-700 flex items-center gap-1">
           🔄 編集をリセット
         </button>
-        <button id="download-png-btn" class="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 active:scale-95 text-sm font-semibold rounded-lg shadow-lg shadow-emerald-900/20 transition-all flex items-center gap-2 text-white">
+        <button id="download-png-btn"
+          class="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 active:scale-95 text-sm font-semibold rounded-lg shadow-lg shadow-emerald-900/20 transition-all flex items-center gap-2 text-white">
           💾 A4画像を保存 (PNG)
         </button>
       </div>
     </div>
   </header>
 
-  <div id="toast-notification" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 text-white text-xs px-4 py-2.5 rounded-xl shadow-xl border border-slate-700 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2">
+  <div id="toast-notification"
+    class="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 text-white text-xs px-4 py-2.5 rounded-xl shadow-xl border border-slate-700 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2">
     <span id="toast-icon">✨</span>
     <span id="toast-text">設定を更新しました</span>
   </div>
 
   <main class="flex-1 max-w-7xl mx-auto w-full p-4 lg:p-6 flex flex-col lg:flex-row gap-6 items-start justify-center">
-    
+
     <!-- エディタセクション -->
-    <section class="w-full lg:w-[400px] bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col gap-5 shrink-0">
+    <section
+      class="w-full lg:w-[400px] bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col gap-5 shrink-0">
       <div>
         <h2 class="font-bold text-slate-900 text-base flex items-center gap-2 border-b pb-2 mb-3">
           <span class="text-indigo-600">🎨</span> 書体を編集する
@@ -130,7 +110,7 @@
             <line x1="50" y1="0" x2="50" y2="100" stroke="#f1f5f9" stroke-width="1" />
             <line x1="0" y1="50" x2="100" y2="50" stroke="#cbd5e1" stroke-width="0.8" stroke-dasharray="3,3" />
             <line x1="50" y1="0" x2="50" y2="100" stroke="#cbd5e1" stroke-width="0.8" stroke-dasharray="3,3" />
-            
+
             <g id="editor-paths"></g>
             <g id="editor-controls"></g>
           </svg>
@@ -138,10 +118,12 @@
       </div>
 
       <div class="flex items-center gap-2 mt-1 border-t pt-3">
-        <button id="export-json-btn" class="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition-all border border-slate-300 flex items-center justify-center gap-1">
+        <button id="export-json-btn"
+          class="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition-all border border-slate-300 flex items-center justify-center gap-1">
           📤 データを保存
         </button>
-        <label for="import-json-input" class="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition-all border border-slate-300 flex items-center justify-center gap-1 cursor-pointer">
+        <label for="import-json-input"
+          class="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition-all border border-slate-300 flex items-center justify-center gap-1 cursor-pointer">
           📥 データを読込
         </label>
         <input type="file" id="import-json-input" accept=".json" class="hidden">
@@ -149,21 +131,38 @@
     </section>
 
     <!-- プレビューセクション -->
-    <section class="flex-1 w-full bg-slate-200/50 p-4 rounded-2xl flex justify-center items-start overflow-y-auto" style="min-height: 80vh;">
-      <div class="a4-preview-sheet shadow-2xl flex flex-col">
-        <div class="flex justify-between items-end border-b-2 border-slate-700 pb-2 mb-4 shrink-0" style="font-size: clamp(0.5rem, 1.5vw, 1rem);">
-          <div>
-            <h2 id="sheet-title-display" class="text-[1.5em] font-bold tracking-widest text-slate-800 font-sans leading-none"></h2>
-            <p id="sheet-subtitle-display" class="text-[0.6em] text-slate-500 tracking-wider mt-1 font-semibold"></p>
-          </div>
-          <div class="text-right text-slate-700 flex items-end gap-1 font-bold text-[0.8em]">
-            <div id="sheet-class-display"></div>
-            <div id="sheet-name-display" class="border-b border-slate-800 pb-0.5 px-4 w-[12em] text-left text-slate-700"></div>
-          </div>
-        </div>
-        <div class="flex-1 flex flex-col justify-start">
-          <table class="grid-table" id="worksheet-table"></table>
-        </div>
+    <section class="flex-1 w-full bg-slate-200/50 p-4 rounded-2xl flex justify-center items-start overflow-y-auto"
+      style="min-height: 80vh;">
+      <div class="a4-preview-sheet shadow-2xl flex flex-col overflow-hidden rounded-sm">
+        <!-- A4プレビューSVG（画面上とPNG出力で全く同じ描画を使用） -->
+        <svg id="worksheet-svg" viewBox="0 0 2480 3508" class="w-full h-auto block bg-white">
+          <style>
+            .sheet-title {
+              font-family: 'BIZ UDPGothic', sans-serif;
+              font-weight: bold;
+              font-size: 85px;
+              fill: #1e293b;
+            }
+
+            .sheet-subtitle {
+              font-family: 'BIZ UDPGothic', sans-serif;
+              font-weight: bold;
+              font-size: 32px;
+              fill: #64748b;
+            }
+
+            .sheet-label {
+              font-family: 'BIZ UDPGothic', sans-serif;
+              font-weight: bold;
+              font-size: 36px;
+              fill: #334155;
+            }
+          </style>
+          <!-- ヘッダー描画領域 -->
+          <g id="svg-header-group"></g>
+          <!-- ワークシートグリッド描画領域 -->
+          <g id="svg-grid-group"></g>
+        </svg>
       </div>
     </section>
 
@@ -172,186 +171,735 @@
   <canvas id="export-canvas" style="display: none;"></canvas>
 
   <script>
-    // --- 共通設定・文言の管理 ---
     const CONFIG = {
       TITLE: 'すうじのれんしゅうちょう',
       SUBTITLE: 'ハミでないように ていねいに なぞって、きれいな すうじを かいてみよう！',
       CLASS_LABEL: '______ ねん ______ くみ',
-      NAME_LABEL: 'なまえ（          ）',
-      UNIFIED_OPACITY: 0.40,
-      TOTAL_ROWS: 15,
+      NAME_LABEL: 'なまえ　_______________________',
+      UNIFIED_OPACITY: 0.25,
       DIGIT_ORDER: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '=']
     };
 
-    const INITIAL_DIGITS = {
+    // 段落構造の定義
+    // 特大(1〜4段): 最初（1・2行目＝「1〜=」の1巡分）のみ showArrow: true
+    // 大(5〜9段): 線の太さを倍に拡大
+    const LAYOUT_ROWS = [
+      // 特大ブロック（4段）
+      { type: 'XL', digits: ['1', '2', '3', '4', '5'], traceScale: 4.5, showArrow: true },
+      { type: 'XL', digits: ['6', '7', '8', '9', '0', '='], traceScale: 4.0, showArrow: true },
+      { type: 'XL', digits: ['1', '2', '3', '4', '5'], traceScale: 3.5, showArrow: false },
+      { type: 'XL', digits: ['6', '7', '8', '9', '0', '='], traceScale: 3.0, showArrow: false },
+
+      // 大ブロック（5段: 5〜9段目）- 線太さを従来の倍（5.0, 4.4, 3.8, 3.2, 2.6）
+      { type: 'L', digits: CONFIG.DIGIT_ORDER, traceScale: 4.2, showArrow: false },
+      { type: 'L', digits: CONFIG.DIGIT_ORDER, traceScale: 3.6, showArrow: false },
+      { type: 'L', digits: CONFIG.DIGIT_ORDER, traceScale: 3.0, showArrow: false },
+      { type: 'L', digits: CONFIG.DIGIT_ORDER, traceScale: 2.2, showArrow: false },
+      { type: 'L', digits: CONFIG.DIGIT_ORDER, traceScale: 2.6, showArrow: false, hideTrace: true },
+
+      // 中ブロック（5段: 10〜14段目）
+      { type: 'M', digits: CONFIG.DIGIT_ORDER, traceScale: 2.4, scale: 0.5, showArrow: false },
+      { type: 'M', digits: CONFIG.DIGIT_ORDER, traceScale: 1.8, scale: 0.5, showArrow: false },
+      { type: 'M', digits: CONFIG.DIGIT_ORDER, traceScale: 0.6, scale: 0.5, showArrow: false },
+      { type: 'M', digits: CONFIG.DIGIT_ORDER, traceScale: 0.5, scale: 0.5, showArrow: false,hideTrace: true  },
+      { type: 'M', digits: CONFIG.DIGIT_ORDER, traceScale: 0.4, scale: 0.5, showArrow: false, hideTrace: true }
+    ];
+
+    const INITIAL_DIGITS =
+    {
       "0": {
         "strokes": [
           [
-            { "x": 58, "y": 19, "hOut": { "x": 42, "y": 19 } },
-            { "x": 32, "y": 50, "hIn": { "x": 39, "y": 35 }, "hOut": { "x": 28, "y": 65 } },
-            { "x": 42, "y": 82, "hIn": { "x": 29, "y": 82 }, "hOut": { "x": 56, "y": 81 } },
-            { "x": 66, "y": 55, "hIn": { "x": 61, "y": 73 }, "hOut": { "x": 68, "y": 42 } },
-            { "x": 61, "y": 20, "hIn": { "x": 71, "y": 27 } }
+            {
+              "x": 58,
+              "y": 19,
+              "hOut": {
+                "x": 42,
+                "y": 19
+              }
+            },
+            {
+              "x": 32,
+              "y": 50,
+              "hIn": {
+                "x": 39,
+                "y": 35
+              },
+              "hOut": {
+                "x": 28,
+                "y": 65
+              }
+            },
+            {
+              "x": 42,
+              "y": 82,
+              "hIn": {
+                "x": 29,
+                "y": 82
+              },
+              "hOut": {
+                "x": 56,
+                "y": 81
+              }
+            },
+            {
+              "x": 66,
+              "y": 55,
+              "hIn": {
+                "x": 61,
+                "y": 73
+              },
+              "hOut": {
+                "x": 68,
+                "y": 42
+              }
+            },
+            {
+              "x": 61,
+              "y": 20,
+              "hIn": {
+                "x": 71,
+                "y": 27
+              }
+            }
           ]
         ],
-        "arrows": [{ "x": 55, "y": 20, "angle": 168.69 }]
+        "arrows": [
+          {
+            "x": 58,
+            "y": 19,
+            "angle": 162.47443162627712
+          }
+        ]
       },
       "1": {
         "strokes": [
           [
-            { "x": 57, "y": 18, "hOut": { "x": 57, "y": 18 } },
-            { "x": 39, "y": 83, "hIn": { "x": 39, "y": 83 } }
+            {
+              "x": 57,
+              "y": 18,
+              "hOut": {
+                "x": 57,
+                "y": 18
+              }
+            },
+            {
+              "x": 39,
+              "y": 83,
+              "hIn": {
+                "x": 39,
+                "y": 83
+              }
+            }
           ]
         ],
-        "arrows": [{ "x": 55, "y": 24, "angle": 104.04 }]
+        "arrows": [
+          {
+            "x": 57,
+            "y": 18,
+            "angle": 104.04
+          }
+        ]
       },
       "2": {
         "strokes": [
           [
-            { "x": 36, "y": 34, "hOut": { "x": 45, "y": 16 } },
-            { "x": 73, "y": 34, "hIn": { "x": 73, "y": 14 }, "hOut": { "x": 73, "y": 48 } },
-            { "x": 30, "y": 80, "hIn": { "x": 34, "y": 74 }, "hOut": { "x": 34, "y": 80 } },
-            { "x": 67, "y": 80, "hIn": { "x": 67, "y": 80 } }
+            {
+              "x": 36,
+              "y": 34,
+              "hOut": {
+                "x": 45,
+                "y": 16
+              }
+            },
+            {
+              "x": 73,
+              "y": 34,
+              "hIn": {
+                "x": 73,
+                "y": 14
+              },
+              "hOut": {
+                "x": 73,
+                "y": 48
+              }
+            },
+            {
+              "x": 30,
+              "y": 80,
+              "hIn": {
+                "x": 34,
+                "y": 74
+              },
+              "hOut": {
+                "x": 34,
+                "y": 80
+              }
+            },
+            {
+              "x": 67,
+              "y": 80,
+              "hIn": {
+                "x": 67,
+                "y": 80
+              }
+            }
           ]
         ],
-        "arrows": [{ "x": 40, "y": 27, "angle": -45 }]
+        "arrows": [
+          {
+            "x": 35,
+            "y": 34,
+            "angle": -45
+          }
+        ]
       },
       "3": {
         "strokes": [
           [
-            { "x": 44, "y": 25, "hOut": { "x": 53, "y": 18 } },
-            { "x": 76, "y": 33, "hIn": { "x": 80, "y": 12 }, "hOut": { "x": 72, "y": 50 } },
-            { "x": 48, "y": 51, "hIn": { "x": 50, "y": 51 }, "hOut": { "x": 50, "y": 51 } },
-            { "x": 73, "y": 67, "hIn": { "x": 79, "y": 46 }, "hOut": { "x": 69, "y": 77 } },
-            { "x": 37, "y": 78, "hIn": { "x": 58, "y": 89 } }
+            {
+              "x": 44,
+              "y": 25,
+              "hOut": {
+                "x": 53,
+                "y": 18
+              }
+            },
+            {
+              "x": 76,
+              "y": 33,
+              "hIn": {
+                "x": 80,
+                "y": 12
+              },
+              "hOut": {
+                "x": 72,
+                "y": 50
+              }
+            },
+            {
+              "x": 48,
+              "y": 51,
+              "hIn": {
+                "x": 50,
+                "y": 51
+              },
+              "hOut": {
+                "x": 50,
+                "y": 51
+              }
+            },
+            {
+              "x": 73,
+              "y": 67,
+              "hIn": {
+                "x": 79,
+                "y": 46
+              },
+              "hOut": {
+                "x": 69,
+                "y": 77
+              }
+            },
+            {
+              "x": 37,
+              "y": 78,
+              "hIn": {
+                "x": 58,
+                "y": 89
+              }
+            }
           ]
         ],
-        "arrows": [{ "x": 47, "y": 22, "angle": -30 }]
+        "arrows": [
+          {
+            "x": 44,
+            "y": 25,
+            "angle": -30
+          }
+        ]
       },
       "4": {
         "strokes": [
           [
-            { "x": 46, "y": 20, "hOut": { "x": 46, "y": 20 } },
-            { "x": 25, "y": 59, "hIn": { "x": 27, "y": 59 }, "hOut": { "x": 28, "y": 59 } },
-            { "x": 74, "y": 60, "hIn": { "x": 74, "y": 60 } }
+            {
+              "x": 46,
+              "y": 20,
+              "hOut": {
+                "x": 46,
+                "y": 20
+              }
+            },
+            {
+              "x": 25,
+              "y": 59,
+              "hIn": {
+                "x": 27,
+                "y": 59
+              },
+              "hOut": {
+                "x": 28,
+                "y": 59
+              }
+            },
+            {
+              "x": 74,
+              "y": 60,
+              "hIn": {
+                "x": 74,
+                "y": 60
+              }
+            }
           ],
           [
-            { "x": 70, "y": 20, "hOut": { "x": 70, "y": 20 } },
-            { "x": 51, "y": 83, "hIn": { "x": 51, "y": 83 } }
+            {
+              "x": 70,
+              "y": 20,
+              "hOut": {
+                "x": 70,
+                "y": 20
+              }
+            },
+            {
+              "x": 51,
+              "y": 83,
+              "hIn": {
+                "x": 51,
+                "y": 83
+              }
+            }
           ]
         ],
         "arrows": [
-          { "x": 45, "y": 29, "angle": 120 },
-          { "x": 64, "y": 35, "angle": 105 }
+          {
+            "x": 45,
+            "y": 20,
+            "angle": 120
+          },
+          {
+            "x": 70,
+            "y": 20,
+            "angle": 105
+          }
         ]
       },
       "5": {
         "strokes": [
           [
-            { "x": 48, "y": 18, "hOut": { "x": 48, "y": 18 } },
-            { "x": 38, "y": 48, "hIn": { "x": 38, "y": 48 }, "hOut": { "x": 38, "y": 48 } },
-            { "x": 64, "y": 66, "hIn": { "x": 70, "y": 44 }, "hOut": { "x": 63, "y": 77 } },
-            { "x": 31, "y": 76, "hIn": { "x": 49, "y": 87 } }
+            {
+              "x": 48,
+              "y": 18,
+              "hOut": {
+                "x": 48,
+                "y": 18
+              }
+            },
+            {
+              "x": 38,
+              "y": 48,
+              "hIn": {
+                "x": 38,
+                "y": 48
+              },
+              "hOut": {
+                "x": 38,
+                "y": 48
+              }
+            },
+            {
+              "x": 64,
+              "y": 66,
+              "hIn": {
+                "x": 70,
+                "y": 44
+              },
+              "hOut": {
+                "x": 63,
+                "y": 77
+              }
+            },
+            {
+              "x": 31,
+              "y": 76,
+              "hIn": {
+                "x": 49,
+                "y": 87
+              }
+            }
           ],
           [
-            { "x": 49, "y": 23, "hOut": { "x": 49, "y": 23 } },
-            { "x": 71, "y": 23, "hIn": { "x": 71, "y": 23 } }
+            {
+              "x": 49,
+              "y": 23,
+              "hOut": {
+                "x": 49,
+                "y": 23
+              }
+            },
+            {
+              "x": 71,
+              "y": 23,
+              "hIn": {
+                "x": 71,
+                "y": 23
+              }
+            }
           ]
         ],
         "arrows": [
-          { "x": 45, "y": 29, "angle": 110 },
-          { "x": 60, "y": 23, "angle": 0 }
+          {
+            "x": 48,
+            "y": 18,
+            "angle": 110
+          },
+          {
+            "x": 55,
+            "y": 24,
+            "angle": 0
+          }
         ]
       },
       "6": {
         "strokes": [
           [
-            { "x": 69, "y": 18, "hOut": { "x": 61, "y": 23 } },
-            { "x": 41, "y": 53, "hIn": { "x": 45, "y": 41 }, "hOut": { "x": 34, "y": 65 } },
-            { "x": 50, "y": 83, "hIn": { "x": 38, "y": 82 }, "hOut": { "x": 62, "y": 83 } },
-            { "x": 70, "y": 67, "hIn": { "x": 70, "y": 79 }, "hOut": { "x": 70, "y": 55 } },
-            { "x": 42, "y": 59, "hIn": { "x": 51, "y": 49 } }
+            {
+              "x": 69,
+              "y": 18,
+              "hOut": {
+                "x": 61,
+                "y": 23
+              }
+            },
+            {
+              "x": 41,
+              "y": 53,
+              "hIn": {
+                "x": 45,
+                "y": 41
+              },
+              "hOut": {
+                "x": 34,
+                "y": 65
+              }
+            },
+            {
+              "x": 50,
+              "y": 83,
+              "hIn": {
+                "x": 38,
+                "y": 82
+              },
+              "hOut": {
+                "x": 62,
+                "y": 83
+              }
+            },
+            {
+              "x": 70,
+              "y": 67,
+              "hIn": {
+                "x": 70,
+                "y": 79
+              },
+              "hOut": {
+                "x": 70,
+                "y": 55
+              }
+            },
+            {
+              "x": 42,
+              "y": 59,
+              "hIn": {
+                "x": 51,
+                "y": 49
+              }
+            }
           ]
         ],
-        "arrows": [{ "x": 61, "y": 25, "angle": 140 }]
+        "arrows": [
+          {
+            "x": 69,
+            "y": 18,
+            "angle": 140
+          }
+        ]
       },
       "7": {
         "strokes": [
           [
-            { "x": 35, "y": 37, "hOut": { "x": 35, "y": 37 } },
-            { "x": 45, "y": 14, "hIn": { "x": 35, "y": 37 }, "hOut": { "x": 42, "y": 14 } },
-            { "x": 43, "y": 14, "hIn": { "x": 44, "y": 14 } }
+            {
+              "x": 35,
+              "y": 37,
+              "hOut": {
+                "x": 35,
+                "y": 37
+              }
+            },
+            {
+              "x": 45,
+              "y": 14,
+              "hIn": {
+                "x": 35,
+                "y": 37
+              },
+              "hOut": {
+                "x": 42,
+                "y": 14
+              }
+            },
+            {
+              "x": 43,
+              "y": 14,
+              "hIn": {
+                "x": 44,
+                "y": 14
+              }
+            }
           ],
           [
-            { "x": 46, "y": 18, "hOut": { "x": 46, "y": 18 } },
-            { "x": 75, "y": 18, "hIn": { "x": 75, "y": 18 }, "hOut": { "x": 75, "y": 18 } },
-            { "x": 46, "y": 83, "hIn": { "x": 46, "y": 83 } }
+            {
+              "x": 46,
+              "y": 18,
+              "hOut": {
+                "x": 46,
+                "y": 18
+              }
+            },
+            {
+              "x": 75,
+              "y": 18,
+              "hIn": {
+                "x": 75,
+                "y": 18
+              },
+              "hOut": {
+                "x": 75,
+                "y": 18
+              }
+            },
+            {
+              "x": 46,
+              "y": 83,
+              "hIn": {
+                "x": 46,
+                "y": 83
+              }
+            }
           ]
         ],
         "arrows": [
-          { "x": 40, "y": 26, "angle": 114.44 },
-          { "x": 57, "y": 16, "angle": 0 }
+          {
+            "x": 44,
+            "y": 15,
+            "angle": 114.44
+          },
+          {
+            "x": 55,
+            "y": 18,
+            "angle": 0
+          }
         ]
       },
       "8": {
         "strokes": [
           [
-            { "x": 75, "y": 28, "hOut": { "x": 80, "y": 25 } },
-            { "x": 46, "y": 51, "hIn": { "x": 53, "y": 44 }, "hOut": { "x": 27, "y": 60 } },
-            { "x": 46, "y": 84, "hIn": { "x": 20, "y": 78 }, "hOut": { "x": 91, "y": 70 } },
-            { "x": 38, "y": 22, "hIn": { "x": 32, "y": 37 }, "hOut": { "x": 46, "y": 8 } },
-            { "x": 73, "y": 23, "hIn": { "x": 69, "y": 12 } }
+            {
+              "x": 75,
+              "y": 28,
+              "hOut": {
+                "x": 80,
+                "y": 25
+              }
+            },
+            {
+              "x": 46,
+              "y": 51,
+              "hIn": {
+                "x": 53,
+                "y": 44
+              },
+              "hOut": {
+                "x": 27,
+                "y": 60
+              }
+            },
+            {
+              "x": 46,
+              "y": 84,
+              "hIn": {
+                "x": 20,
+                "y": 78
+              },
+              "hOut": {
+                "x": 91,
+                "y": 70
+              }
+            },
+            {
+              "x": 38,
+              "y": 22,
+              "hIn": {
+                "x": 32,
+                "y": 37
+              },
+              "hOut": {
+                "x": 46,
+                "y": 8
+              }
+            },
+            {
+              "x": 73,
+              "y": 23,
+              "hIn": {
+                "x": 69,
+                "y": 12
+              }
+            }
           ]
         ],
-        "arrows": [{ "x": 70, "y": 20, "angle": -150 }]
+        "arrows": [
+          {
+            "x": 73,
+            "y": 24,
+            "angle": -141.34019174590992
+          }
+        ]
       },
       "9": {
         "strokes": [
           [
-            { "x": 72, "y": 24, "hOut": { "x": 72, "y": 20 } },
-            { "x": 51, "y": 13, "hIn": { "x": 62, "y": 11 }, "hOut": { "x": 43, "y": 13 } },
-            { "x": 36, "y": 30, "hIn": { "x": 36, "y": 20 }, "hOut": { "x": 36, "y": 40 } },
-            { "x": 51, "y": 45, "hIn": { "x": 42, "y": 43 }, "hOut": { "x": 64, "y": 45 } },
-            { "x": 71, "y": 27, "hIn": { "x": 72, "y": 28 }, "hOut": { "x": 80, "y": 23 } },
-            { "x": 46, "y": 85, "hIn": { "x": 46, "y": 85 } }
+            {
+              "x": 72,
+              "y": 24,
+              "hOut": {
+                "x": 72,
+                "y": 20
+              }
+            },
+            {
+              "x": 51,
+              "y": 13,
+              "hIn": {
+                "x": 62,
+                "y": 11
+              },
+              "hOut": {
+                "x": 43,
+                "y": 13
+              }
+            },
+            {
+              "x": 36,
+              "y": 30,
+              "hIn": {
+                "x": 36,
+                "y": 20
+              },
+              "hOut": {
+                "x": 36,
+                "y": 40
+              }
+            },
+            {
+              "x": 51,
+              "y": 45,
+              "hIn": {
+                "x": 42,
+                "y": 43
+              },
+              "hOut": {
+                "x": 64,
+                "y": 45
+              }
+            },
+            {
+              "x": 71,
+              "y": 27,
+              "hIn": {
+                "x": 72,
+                "y": 28
+              },
+              "hOut": {
+                "x": 80,
+                "y": 23
+              }
+            },
+            {
+              "x": 46,
+              "y": 85,
+              "hIn": {
+                "x": 46,
+                "y": 85
+              }
+            }
           ]
         ],
-        "arrows": [{ "x": 67, "y": 19, "angle": -165 }]
+        "arrows": [
+          {
+            "x": 71,
+            "y": 23,
+            "angle": -145.49147701233161
+          }
+        ]
       },
       "=": {
         "strokes": [
           [
-            { "x": 28, "y": 40, "hOut": { "x": 28, "y": 40 } },
-            { "x": 71, "y": 40, "hIn": { "x": 71, "y": 40 } }
+            {
+              "x": 28,
+              "y": 40,
+              "hOut": {
+                "x": 28,
+                "y": 40
+              }
+            },
+            {
+              "x": 71,
+              "y": 40,
+              "hIn": {
+                "x": 71,
+                "y": 40
+              }
+            }
           ],
           [
-            { "x": 28, "y": 60, "hOut": { "x": 28, "y": 60 } },
-            { "x": 71, "y": 60, "hIn": { "x": 71, "y": 60 } }
+            {
+              "x": 28,
+              "y": 60,
+              "hOut": {
+                "x": 28,
+                "y": 60
+              }
+            },
+            {
+              "x": 71,
+              "y": 60,
+              "hIn": {
+                "x": 71,
+                "y": 60
+              }
+            }
           ]
         ],
         "arrows": [
-          { "x": 36, "y": 38, "angle": 0 },
-          { "x": 36, "y": 58, "angle": 0 }
+          {
+            "x": 36,
+            "y": 38,
+            "angle": 0
+          },
+          {
+            "x": 36,
+            "y": 58,
+            "angle": 0
+          }
         ]
       }
-    };
+    }
 
     let digits = structuredClone(INITIAL_DIGITS);
     let selectedDigit = '1';
     let draggingInfo = null;
 
-    // 行の設定（スケールと線の太さ）
-    const rowsConfig = Array.from({ length: CONFIG.TOTAL_ROWS }, (_, r) => {
-      if (r < 5) {
-        return { scale: 1.0, traceScale: [3.0, 2.5, 2.0, 1.5, 1.0][r] };
-      } else if (r < 10) {
-        return { scale: 2/3, traceScale: [2.0, 1.7, 1.4, 1.1, 0.8][r - 5] };
-      } else {
-        return { scale: 1/2, traceScale: [1.5, 1.3, 1.1, 0.9, 0.7][r - 10] };
-      }
-    });
-
-    // --- 共通ユーティリティ関数 ---
     function makePathData(stroke, mapper = (p) => p) {
       if (!stroke || stroke.length === 0) return '';
       const start = mapper(stroke[0]);
@@ -375,19 +923,9 @@
       return el;
     }
 
-    // --- UIテキストの初期化 ---
-    function initTexts() {
-      document.getElementById('sheet-title-display').textContent = CONFIG.TITLE;
-      document.getElementById('sheet-subtitle-display').textContent = CONFIG.SUBTITLE;
-      document.getElementById('sheet-class-display').textContent = CONFIG.CLASS_LABEL;
-      document.getElementById('sheet-name-display').textContent = CONFIG.NAME_LABEL;
-    }
-
-    // --- タブ＆エディタ関連 ---
     const digitTabsContainer = document.getElementById('digit-tabs-container');
     const editorPathsG = document.getElementById('editor-paths');
     const editorControlsG = document.getElementById('editor-controls');
-    const worksheetTable = document.getElementById('worksheet-table');
 
     function createDigitTabs() {
       digitTabsContainer.innerHTML = '';
@@ -450,32 +988,46 @@
         });
       });
 
-      // 矢印ハンドル描画
+      // 新しい矢印スタイル (始点● + 濃い矢印➔) のエディタ描画
       if (digitData.arrows) {
         digitData.arrows.forEach((arr, aIdx) => {
-          const arrowText = createSvgElement('text', {
-            x: arr.x, y: arr.y, 'font-size': '14', 'font-weight': 'bold', 'font-family': 'sans-serif',
-            fill: '#1e293b', 'text-anchor': 'middle', 'dominant-baseline': 'central',
-            transform: `rotate(${arr.angle} ${arr.x} ${arr.y})`, 'pointer-events': 'none'
+          // 始点●
+          const dot = createSvgElement('circle', {
+            cx: arr.x, cy: arr.y, r: '3.5',
+            fill: '#433f6c'
           });
-          arrowText.textContent = '→';
-          editorControlsG.appendChild(arrowText);
+          editorControlsG.appendChild(dot);
 
+          // 矢印テキスト (濃い色)
+          const arrowGroup = createSvgElement('g', {
+            transform: `translate(${arr.x}, ${arr.y}) rotate(${arr.angle})`
+          });
+          const arrowText = createSvgElement('text', {
+            x: '5', y: '0', 'font-size': '12', 'font-weight': 'bold', 'font-family': 'sans-serif',
+            fill: '#433f6c', 'text-anchor': 'start', 'dominant-baseline': 'central',
+            'pointer-events': 'none'
+          });
+          arrowText.textContent = '➔';
+          arrowGroup.appendChild(arrowText);
+          editorControlsG.appendChild(arrowGroup);
+
+          // 位置指定ハンドル (黄色四角)
           const posH = createSvgElement('rect', {
-            x: arr.x - 5, y: arr.y - 5, width: '10', height: '10',
+            x: arr.x - 6, y: arr.y - 6, width: '12', height: '12',
             fill: 'rgba(234, 179, 8, 0.4)', stroke: '#ca8a04', 'stroke-width': '1.5', class: 'cursor-move'
           });
           posH.addEventListener('mousedown', (e) => startDrag(e, null, aIdx, 'arrowPos'));
           posH.addEventListener('touchstart', (e) => startDrag(e, null, aIdx, 'arrowPos'));
           editorControlsG.appendChild(posH);
 
-          const dist = 16;
+          // 角度ハンドル (黄色丸)
+          const dist = 18;
           const rad = arr.angle * Math.PI / 180;
           const ax = arr.x + Math.cos(rad) * dist;
           const ay = arr.y + Math.sin(rad) * dist;
 
-          const angLine = createSvgElement('line', { x1: arr.x, y1: arr.y, x2: ax, y2: ay, stroke: '#ca8a04', 'stroke-width': '1' });
-          const angH = createSvgElement('circle', { cx: ax, cy: ay, r: '3.5', fill: '#fef08a', stroke: '#ca8a04', 'stroke-width': '1.5', class: 'cursor-move' });
+          const angLine = createSvgElement('line', { x1: arr.x, y1: arr.y, x2: ax, y2: ay, stroke: '#ca8a04', 'stroke-width': '1.2' });
+          const angH = createSvgElement('circle', { cx: ax, cy: ay, r: '4', fill: '#fef08a', stroke: '#ca8a04', 'stroke-width': '1.5', class: 'cursor-move' });
           angH.addEventListener('mousedown', (e) => startDrag(e, null, aIdx, 'arrowAngle'));
           angH.addEventListener('touchstart', (e) => startDrag(e, null, aIdx, 'arrowAngle'));
           editorControlsG.appendChild(angLine);
@@ -542,238 +1094,173 @@
     window.addEventListener('touchmove', onDrag, { passive: false });
     window.addEventListener('touchend', endDrag);
 
-    // --- プレビュー生成 ---
     function renderWorksheet() {
-      worksheetTable.innerHTML = '';
+      const headerGroup = document.getElementById('svg-header-group');
+      const gridGroup = document.getElementById('svg-grid-group');
+      headerGroup.innerHTML = '';
+      gridGroup.innerHTML = '';
 
-      for (let r = 0; r < CONFIG.TOTAL_ROWS; r++) {
-        const tr = document.createElement('tr');
-        const config = rowsConfig[r];
+      // 1. ヘッダー描画
+      const titleTxt = createSvgElement('text', { x: '120', y: '200', class: 'sheet-title' });
+      titleTxt.textContent = CONFIG.TITLE;
+      headerGroup.appendChild(titleTxt);
 
-        CONFIG.DIGIT_ORDER.forEach(num => {
-          const td = document.createElement('td');
-          const innerDiv = document.createElement('div');
-          innerDiv.className = 'cell-inner flex justify-center items-center';
+      const subtitleTxt = createSvgElement('text', { x: '120', y: '260', class: 'sheet-subtitle' });
+      subtitleTxt.textContent = CONFIG.SUBTITLE;
+      headerGroup.appendChild(subtitleTxt);
 
-          const svg = createSvgElement('svg', { viewBox: '0 0 100 100', style: 'width: 100%; height: 100%; display: block;' });
+      const classTxt = createSvgElement('text', { x: '1350', y: '240', class: 'sheet-label' });
+      classTxt.textContent = CONFIG.CLASS_LABEL;
+      headerGroup.appendChild(classTxt);
 
-          const scale = config.scale;
-          const size = 100 * scale;
-          const offset = (100 - size) / 2;
+      const nameTxt = createSvgElement('text', { x: '1800', y: '240', class: 'sheet-label' });
+      nameTxt.textContent = CONFIG.NAME_LABEL;
+      headerGroup.appendChild(nameTxt);
 
-          // 枠線・ガイド線
-          svg.appendChild(createSvgElement('rect', { x: offset, y: offset, width: size, height: size, fill: 'none', stroke: '#a4c2f4', 'stroke-width': '1.2' }));
-          
-          const dashLen = 2 * scale;
-          svg.appendChild(createSvgElement('line', { x1: offset, y1: 50, x2: offset + size, y2: 50, stroke: '#cbd5e1', 'stroke-width': '0.6', 'stroke-dasharray': `${dashLen},${dashLen}` }));
-          svg.appendChild(createSvgElement('line', { x1: 50, y1: offset, x2: 50, y2: offset + size, stroke: '#cbd5e1', 'stroke-width': '0.6', 'stroke-dasharray': `${dashLen},${dashLen}` }));
+      const headerLine = createSvgElement('line', { x1: '120', y1: '310', x2: '2360', y2: '310', stroke: '#1e293b', 'stroke-width': '4' });
+      headerGroup.appendChild(headerLine);
 
-          // ブロックの最後の行(5, 10, 15段目)以外に文字と矢印を表示
-          if ((r + 1) % 5 !== 0) {
-            const dData = digits[num];
-            if (dData && dData.strokes) {
+      // 2. グリッド＆文字データ描画
+      // A4描画可能幅: 1868px (左右中央配置 X:306px)
+      const gridLeft = 306;
+      const gridWidth = 1868;
+      let currentY = 340;
+
+      LAYOUT_ROWS.forEach((rowConfig) => {
+        const colsCount = rowConfig.digits.length;
+        const cellWidth = gridWidth / colsCount;
+        const cellHeight = cellWidth; // 正方形セル
+
+        rowConfig.digits.forEach((digitChar, cIdx) => {
+          const scale = rowConfig.scale || 1.0;
+          const innerSize = cellWidth * scale;
+          const offsetX = gridLeft + cIdx * cellWidth + (cellWidth - innerSize) / 2;
+          const offsetY = currentY + (cellHeight - innerSize) / 2;
+          const centerX = offsetX + innerSize / 2;
+          const centerY = offsetY + innerSize / 2;
+
+          // 青いセル枠線
+          const borderRect = createSvgElement('rect', {
+            x: offsetX, y: offsetY, width: innerSize, height: innerSize,
+            fill: 'none', stroke: '#a4c2f4',
+            'stroke-width': rowConfig.type === 'XL' ? '5' : '3'
+          });
+          gridGroup.appendChild(borderRect);
+
+          // ガイド点線（十字線）
+          const dashLen = 12 * scale;
+          const hDash = createSvgElement('line', {
+            x1: offsetX, y1: centerY, x2: offsetX + innerSize, y2: centerY,
+            stroke: '#cbd5e1', 'stroke-width': '2', 'stroke-dasharray': `${dashLen},${dashLen}`
+          });
+          const vDash = createSvgElement('line', {
+            x1: centerX, y1: offsetY, x2: centerX, y2: offsetY + innerSize,
+            stroke: '#cbd5e1', 'stroke-width': '2', 'stroke-dasharray': `${dashLen},${dashLen}`
+          });
+          gridGroup.appendChild(hDash);
+          gridGroup.appendChild(vDash);
+
+          // なぞり文字データ
+          if (!rowConfig.hideTrace) {
+
+
+            const digitData = digits[digitChar];
+            if (digitData && digitData.strokes) {
               const mapPt = (p) => ({
-                x: offset + (p.x / 100) * size,
-                y: offset + (p.y / 100) * size
+                x: offsetX + (p.x / 100) * innerSize,
+                y: offsetY + (p.y / 100) * innerSize
               });
 
-              dData.strokes.forEach(stroke => {
+              const strokeGroup = createSvgElement('g', { opacity: CONFIG.UNIFIED_OPACITY });
+
+              digitData.strokes.forEach(stroke => {
                 const d = makePathData(stroke, mapPt);
                 if (d) {
                   const strokePath = createSvgElement('path', {
                     d, fill: 'none', stroke: '#475569',
-                    'stroke-width': 7 * config.traceScale,
-                    'stroke-linecap': 'round', 'stroke-linejoin': 'round',
-                    opacity: CONFIG.UNIFIED_OPACITY
+                    'stroke-width': (rowConfig.type === 'XL' ? 36 : 20) * (rowConfig.traceScale / 2),
+                    'stroke-linecap': 'round', 'stroke-linejoin': 'round'
                   });
-                  svg.appendChild(strokePath);
+                  strokeGroup.appendChild(strokePath);
                 }
               });
+              gridGroup.appendChild(strokeGroup);
 
-              if (r === 0 && dData.arrows) {
-                dData.arrows.forEach(arr => {
-                  const pt = mapPt(arr);
-                  const arrowText = createSvgElement('text', {
-                    x: pt.x, y: pt.y, 'font-size': `${14 * scale}`, 'font-weight': 'bold',
-                    'font-family': 'sans-serif', fill: '#1e293b', 'text-anchor': 'middle',
-                    'dominant-baseline': 'central', transform: `rotate(${arr.angle} ${pt.x} ${pt.y})`
-                  });
-                  arrowText.textContent = '→';
-                  svg.appendChild(arrowText);
-                });
-              }
-            }
-          }
-
-          innerDiv.appendChild(svg);
-          td.appendChild(innerDiv);
-          tr.appendChild(td);
-        });
-
-        worksheetTable.appendChild(tr);
-      }
-    }
-
-    // --- 高解像度PNG保存 (Canvas描画) ---
-    function generateHighResPNG() {
-      const canvas = document.getElementById('export-canvas');
-      const ctx = canvas.getContext('2d');
-
-      const canvasWidth = 2480;
-      const canvasHeight = 3508;
-      canvas.width = canvasWidth;
-      canvas.height = canvasHeight;
-
-      // 背景色
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-
-      // タイトル・サブタイトル・ヘッダー（共通テキスト定数を利用）
-      ctx.fillStyle = '#1e293b';
-      ctx.font = 'bold 85px "BIZ UDPGothic", "Hiragino Sans", "Meiryo", sans-serif';
-      ctx.fillText(CONFIG.TITLE, 120, 200);
-
-      ctx.fillStyle = '#64748b';
-      ctx.font = 'bold 32px "BIZ UDPGothic", "Hiragino Sans", sans-serif';
-      ctx.fillText(CONFIG.SUBTITLE, 120, 260);
-
-      ctx.fillStyle = '#334155';
-      ctx.font = 'bold 36px "BIZ UDPGothic", sans-serif';
-      ctx.fillText(CONFIG.CLASS_LABEL, 1350, 240);
-      ctx.fillText(CONFIG.NAME_LABEL, 1800, 240);
-
-      ctx.beginPath();
-      ctx.strokeStyle = '#1e293b';
-      ctx.lineWidth = 4;
-      ctx.moveTo(120, 310);
-      ctx.lineTo(2360, 310);
-      ctx.stroke();
-
-      const gridLeft = 120;
-      const gridTop = 360;
-      const gridWidth = 2240;
-      const colWidth = gridWidth / 11;
-      const rowHeight = colWidth;
-
-      // グリッド線描画
-      const largeRows = 5;
-      for (let r = 0; r <= largeRows; r++) {
-        ctx.beginPath();
-        ctx.strokeStyle = '#a4c2f4';
-        ctx.lineWidth = (r === 0 || r === largeRows) ? 5 : 3;
-        ctx.moveTo(gridLeft, gridTop + r * rowHeight);
-        ctx.lineTo(gridLeft + gridWidth, gridTop + r * rowHeight);
-        ctx.stroke();
-      }
-      for (let c = 0; c <= 11; c++) {
-        ctx.beginPath();
-        ctx.strokeStyle = '#a4c2f4';
-        ctx.lineWidth = (c === 0 || c === 11) ? 5 : 3;
-        ctx.moveTo(gridLeft + c * colWidth, gridTop);
-        ctx.lineTo(gridLeft + c * colWidth, gridTop + largeRows * rowHeight);
-        ctx.stroke();
-      }
-
-      for (let r = largeRows; r < CONFIG.TOTAL_ROWS; r++) {
-        const config = rowsConfig[r];
-        for (let c = 0; c < 11; c++) {
-          const cellSize = colWidth * config.scale;
-          const offsetX = gridLeft + c * colWidth + (colWidth - cellSize) / 2;
-          const offsetY = gridTop + r * rowHeight + (rowHeight - cellSize) / 2;
-          ctx.beginPath();
-          ctx.strokeStyle = '#a4c2f4';
-          ctx.lineWidth = 3;
-          ctx.strokeRect(offsetX, offsetY, cellSize, cellSize);
-        }
-      }
-
-      // セル内描画
-      for (let r = 0; r < CONFIG.TOTAL_ROWS; r++) {
-        const config = rowsConfig[r];
-        const cellSize = colWidth * config.scale;
-        
-        for (let c = 0; c < 11; c++) {
-          const offsetX = gridLeft + c * colWidth + (colWidth - cellSize) / 2;
-          const offsetY = gridTop + r * rowHeight + (rowHeight - cellSize) / 2;
-          const centerX = offsetX + cellSize / 2;
-          const centerY = offsetY + cellSize / 2;
-
-          const dashLen = 12 * config.scale;
-          ctx.beginPath();
-          ctx.strokeStyle = '#cbd5e1';
-          ctx.lineWidth = 2;
-          ctx.setLineDash([dashLen, dashLen]);
-          ctx.moveTo(offsetX, centerY); ctx.lineTo(offsetX + cellSize, centerY);
-          ctx.moveTo(centerX, offsetY); ctx.lineTo(centerX, offsetY + cellSize);
-          ctx.stroke();
-          ctx.setLineDash([]);
-
-          if ((r + 1) % 5 !== 0) {
-            const digitChar = CONFIG.DIGIT_ORDER[c];
-            const digitData = digits[digitChar];
-
-            if (digitData && digitData.strokes) {
-              const mapPt = (p) => ({
-                x: offsetX + (p.x / 100) * cellSize,
-                y: offsetY + (p.y / 100) * cellSize
-              });
-
-              ctx.save();
-              ctx.globalAlpha = CONFIG.UNIFIED_OPACITY;
-              ctx.strokeStyle = '#475569';
-              ctx.lineWidth = 15 * config.traceScale;
-              ctx.lineCap = 'round';
-              ctx.lineJoin = 'round';
-
-              digitData.strokes.forEach(stroke => {
-                if (stroke.length === 0) return;
-                ctx.beginPath();
-                const startPt = mapPt(stroke[0]);
-                ctx.moveTo(startPt.x, startPt.y);
-                for (let i = 1; i < stroke.length; i++) {
-                  const prev = stroke[i - 1]; const curr = stroke[i];
-                  const cp1 = mapPt(prev.hOut ? prev.hOut : prev);
-                  const cp2 = mapPt(curr.hIn ? curr.hIn : curr);
-                  const end = mapPt(curr);
-                  ctx.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, end.x, end.y);
-                }
-                ctx.stroke();
-              });
-              ctx.restore();
-
-              // 矢印の描画
-              if (r === 0 && digitData.arrows) {
-                ctx.fillStyle = '#1e293b';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                const fontSize = 32 * config.scale; 
-                ctx.font = `bold ${fontSize}px sans-serif`;
-
+              // 書き順矢印 (始点● + 濃い色矢印➔)
+              if (rowConfig.showArrow && digitData.arrows) {
                 digitData.arrows.forEach(arr => {
                   const pt = mapPt(arr);
-                  ctx.save();
-                  ctx.translate(pt.x, pt.y);
-                  ctx.rotate(arr.angle * Math.PI / 180);
-                  ctx.fillText('→', 0, 0);
-                  ctx.restore();
+
+                  // 矢印用グループ
+                  const arrowG = createSvgElement('g', {
+                    transform: `translate(${pt.x}, ${pt.y}) rotate(${arr.angle})`
+                  });
+
+                  // 始点●
+                  const dotRadius = rowConfig.type === 'XL' ? 15 : 12;
+                  const dot = createSvgElement('circle', {
+                    cx: '0', cy: '0', r: `${dotRadius * scale}`, fill: '#433f6c'
+                  });
+                  arrowG.appendChild(dot);
+
+                  // 矢印テキスト ➔
+                  const fontSize = rowConfig.type === 'XL' ? 50 : 40;
+                  const offsetDistance = rowConfig.type === 'XL' ? 12 : 8;
+                  const arrowText = createSvgElement('text', {
+                    x: `${offsetDistance * scale}`, y: '0',
+                    'font-size': `${fontSize * scale}`, 'font-weight': 'bold',
+                    'font-family': 'sans-serif', fill: '#433f6c',
+                    'text-anchor': 'start', 'dominant-baseline': 'central'
+                  });
+                  arrowText.textContent = '➔';
+                  arrowG.appendChild(arrowText);
+
+                  gridGroup.appendChild(arrowG);
                 });
               }
             }
           }
-        }
-      }
+        });
 
-      // 画像のダウンロード実行
-      const dataURL = canvas.toDataURL('image/png');
-      const downloadLink = document.createElement('a');
-      downloadLink.href = dataURL;
-      downloadLink.download = `${CONFIG.TITLE}_A4_15段.png`;
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-      document.body.removeChild(downloadLink);
+        currentY += cellHeight;
+      });
     }
 
-    // --- 各種ボタンイベント ---
+    function generateHighResPNG() {
+      const svgEl = document.getElementById('worksheet-svg');
+      const serializer = new XMLSerializer();
+      let svgString = serializer.serializeToString(svgEl);
+
+      if (!svgString.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
+        svgString = svgString.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+      }
+
+      const canvas = document.getElementById('export-canvas');
+      canvas.width = 2480;
+      canvas.height = 3508;
+      const ctx = canvas.getContext('2d');
+
+      const img = new Image();
+      const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
+
+      img.onload = function () {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0);
+        URL.revokeObjectURL(url);
+
+        const dataURL = canvas.toDataURL('image/png');
+        const downloadLink = document.createElement('a');
+        downloadLink.href = dataURL;
+        downloadLink.download = `${CONFIG.TITLE}_A4.png`;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+      };
+      img.src = url;
+    }
+
     document.getElementById('reset-all-btn').addEventListener('click', () => {
       digits = structuredClone(INITIAL_DIGITS);
       renderEditor();
@@ -806,7 +1293,6 @@
           const importedData = JSON.parse(e.target.result);
           if (importedData['1'] && importedData['2']) {
             if (!importedData['=']) importedData['='] = structuredClone(INITIAL_DIGITS['=']);
-            // 矢印データがない古いデータの補正
             Object.keys(importedData).forEach(key => {
               if (importedData[key] && !importedData[key].arrows) {
                 importedData[key].arrows = importedData[key].strokes.map(s => ({ x: s[0].x, y: s[0].y, angle: 0 }));
@@ -831,26 +1317,25 @@
       const toast = document.getElementById('toast-notification');
       const toastText = document.getElementById('toast-text');
       const toastIcon = document.getElementById('toast-icon');
-      
+
       toastText.textContent = message;
       toastIcon.textContent = icon;
-      
+
       toast.classList.remove('opacity-0', 'pointer-events-none');
       toast.classList.add('opacity-100');
-      
+
       setTimeout(() => {
         toast.classList.remove('opacity-100');
         toast.classList.add('opacity-0', 'pointer-events-none');
       }, 3000);
     }
 
-    // 初期化処理
-    window.onload = function() {
-      initTexts();
+    window.onload = function () {
       createDigitTabs();
       renderEditor();
       renderWorksheet();
     };
   </script>
 </body>
+
 </html>
