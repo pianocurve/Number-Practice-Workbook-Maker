@@ -1,566 +1,828 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ビリビリ！文字なぞりチャレンジ 〜 数字編</title>
-  <!-- OGP設定 -->
-  <meta property="og:title" content="ビリビリ！文字なぞりチャレンジ 〜 数字編">
-  <meta property="og:description" content="数字の練習帳を作る。数字はベジェハンドルで形を作り、書き順矢印を配置して高画質なA4シートを作成">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://pianocurve.github.io/Number-Practice-Workbook-Maker/game.html">
-  <meta property="og:image" content="https://pianocurve.github.io/Number-Practice-Workbook-Maker/ogp-image_game.jpg">
-  <meta name="twitter:card" content="summary_large_image">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ビリビリ！文字なぞりチャレンジ 〜 数字編</title>
+    <!-- OGP設定 -->
+    <meta property="og:title" content="ビリビリ！文字なぞりチャレンジ 〜 数字編">
+    <meta property="og:description" content="数字の練習帳を作る。数字はベジェハンドルで形を作り、書き順矢印を配置して高画質なA4シートを作成">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://pianocurve.github.io/Number-Practice-Workbook-Maker/game.html">
+    <meta property="og:image" content="https://pianocurve.github.io/Number-Practice-Workbook-Maker/ogp-image_game.jpg">
+    <meta name="twitter:card" content="summary_large_image">
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;900&display=swap" rel="stylesheet">
-  <style>
-    html, body {
-      height: 100%;
-      height: 100dvh;
-      overflow: hidden;
-      font-family: 'M PLUS Rounded 1c', sans-serif;
-      touch-action: none;
-      user-select: none;
-    }
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        html,
+        body {
+            height: 100%;
+            height: 100dvh;
+            overflow: hidden;
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+            touch-action: none;
+            user-select: none;
+        }
 
-    @keyframes shake {
-      0%, 100% { transform: translate(0, 0) rotate(0deg); }
-      20% { transform: translate(-8px, 5px) rotate(-1deg); }
-      40% { transform: translate(8px, -5px) rotate(1deg); }
-      60% { transform: translate(-5px, -3px) rotate(-0.5deg); }
-      80% { transform: translate(5px, 3px) rotate(0.5deg); }
-    }
-    .animate-shake {
-      animation: shake 0.25s ease-in-out;
-    }
+        @keyframes shake {
 
-    #flash-overlay {
-      pointer-events: none;
-      transition: opacity 0.15s ease-out;
-    }
+            0%,
+            100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
 
-    .fever-bg {
-      background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 50%, #fbcfe8 100%) !important;
-    }
+            20% {
+                transform: translate(-8px, 5px) rotate(-1deg);
+            }
 
-    .custom-scrollbar::-webkit-scrollbar {
-      height: 4px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-track {
-      background: rgba(226, 232, 240, 0.6);
-      border-radius: 10px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #a5b4fc;
-      border-radius: 10px;
-    }
-  </style>
+            40% {
+                transform: translate(8px, -5px) rotate(1deg);
+            }
+
+            60% {
+                transform: translate(-5px, -3px) rotate(-0.5deg);
+            }
+
+            80% {
+                transform: translate(5px, 3px) rotate(0.5deg);
+            }
+        }
+
+        .animate-shake {
+            animation: shake 0.25s ease-in-out;
+        }
+
+        #flash-overlay {
+            pointer-events: none;
+            transition: opacity 0.15s ease-out;
+        }
+
+        .fever-bg {
+            background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 50%, #fbcfe8 100%) !important;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(226, 232, 240, 0.6);
+            border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #a5b4fc;
+            border-radius: 10px;
+        }
+    </style>
 </head>
 
-<body id="bg-body" class="bg-amber-50 text-slate-800 h-full max-h-[100dvh] flex flex-col justify-between p-2 sm:p-3 relative overflow-hidden transition-colors duration-500">
+<body id="bg-body"
+    class="bg-amber-50 text-slate-800 h-full max-h-[100dvh] flex flex-col justify-between p-2 sm:p-3 relative overflow-hidden transition-colors duration-500">
 
-  <div id="flash-overlay" class="fixed inset-0 bg-red-500/30 opacity-0 z-50"></div>
-  <canvas id="particle-canvas" class="fixed inset-0 pointer-events-none z-40"></canvas>
+    <div id="flash-overlay" class="fixed inset-0 bg-red-500/30 opacity-0 z-50"></div>
+    <canvas id="particle-canvas" class="fixed inset-0 pointer-events-none z-40"></canvas>
 
-  <!-- ヘッダー -->
-  <header class="w-full max-w-md mx-auto bg-white/90 backdrop-blur-sm rounded-2xl p-2.5 shadow-md border-2 border-yellow-300 flex flex-col gap-1.5 shrink-0 z-10">
-    <div class="flex justify-between items-center">
-      <div class="flex items-center gap-2">
-        <div class="bg-yellow-400 text-yellow-900 font-black px-2.5 py-1 rounded-xl text-xs flex flex-col items-center shadow-inner">
-          <span>LV</span>
-          <span id="level-val" class="text-base leading-none">1</span>
+    <!-- ヘッダー -->
+    <header
+        class="w-full max-w-md mx-auto bg-white/90 backdrop-blur-sm rounded-2xl p-2.5 shadow-md border-2 border-yellow-300 flex flex-col gap-1.5 shrink-0 z-10">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div
+                    class="bg-yellow-400 text-yellow-900 font-black px-2.5 py-1 rounded-xl text-xs flex flex-col items-center shadow-inner">
+                    <span>LV</span>
+                    <span id="level-val" class="text-base leading-none">1</span>
+                </div>
+                <div>
+                    <div class="text-[10px] font-bold text-slate-400">COMBO</div>
+                    <div id="combo-val" class="text-lg font-black text-orange-500 flex items-center gap-1 leading-none">
+                        0 <span id="fever-badge"
+                            class="hidden text-[10px] bg-pink-500 text-white font-extrabold px-1.5 py-0.5 rounded-full shadow animate-bounce">FEVER!</span>
+                    </div>
+                </div>
+            </div>
+            <div class="text-right">
+                <div class="text-[10px] font-bold text-slate-400">SCORE</div>
+                <div id="score-val" class="text-2xl font-black text-emerald-500 tracking-wider leading-none">0</div>
+            </div>
         </div>
-        <div>
-          <div class="text-[10px] font-bold text-slate-400">COMBO</div>
-          <div id="combo-val" class="text-lg font-black text-orange-500 flex items-center gap-1 leading-none">
-            0 <span id="fever-badge" class="hidden text-[10px] bg-pink-500 text-white font-extrabold px-1.5 py-0.5 rounded-full shadow animate-bounce">FEVER!</span>
-          </div>
+
+        <!-- ライフゲージ -->
+        <div class="flex items-center justify-between bg-rose-50 px-2 py-1 rounded-xl border border-rose-100">
+            <span class="text-[10px] font-bold text-rose-500 shrink-0">LIFE</span>
+            <div id="life-container" class="flex gap-0.5 text-xs">
+                <span>❤️</span><span>❤️</span><span>❤️</span><span>❤️</span><span>❤️</span><span>❤️</span><span>❤️</span><span>❤️</span><span>❤️</span><span>❤️</span>
+            </div>
         </div>
-      </div>
-      <div class="text-right">
-        <div class="text-[10px] font-bold text-slate-400">SCORE</div>
-        <div id="score-val" class="text-2xl font-black text-emerald-500 tracking-wider leading-none">0</div>
-      </div>
-    </div>
+    </header>
 
-    <!-- ライフゲージ -->
-    <div class="flex items-center justify-between bg-rose-50 px-2 py-1 rounded-xl border border-rose-100">
-      <span class="text-[10px] font-bold text-rose-500 shrink-0">LIFE</span>
-      <div id="life-container" class="flex gap-0.5 text-xs">
-        <span>❤️</span><span>❤️</span><span>❤️</span><span>❤️</span><span>❤️</span><span>❤️</span><span>❤️</span><span>❤️</span><span>❤️</span><span>❤️</span>
-      </div>
-    </div>
-  </header>
+    <!-- メインキャンバス -->
+    <main id="game-container"
+        class="relative w-full max-w-md max-h-[50dvh] aspect-square mx-auto my-auto flex items-center justify-center shrink z-10">
+        <div id="stroke-indicator"
+            class="absolute top-2 left-2 bg-white/90 backdrop-blur-sm px-2.5 py-0.5 rounded-full border border-indigo-200 text-[11px] font-bold text-indigo-600 z-20 shadow-sm">
+            画数: <span id="current-stroke-val">1</span> / <span id="total-strokes-val">1</span>
+        </div>
 
-  <!-- メインキャンバス -->
-  <main id="game-container" class="relative w-full max-w-md max-h-[50dvh] aspect-square mx-auto my-auto flex items-center justify-center shrink z-10">
-    <div id="stroke-indicator" class="absolute top-2 left-2 bg-white/90 backdrop-blur-sm px-2.5 py-0.5 rounded-full border border-indigo-200 text-[11px] font-bold text-indigo-600 z-20 shadow-sm">
-      画数: <span id="current-stroke-val">1</span> / <span id="total-strokes-val">1</span>
-    </div>
+        <div class="absolute top-2 right-2 flex gap-1 z-20">
+            <div class="bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded-full border border-emerald-200 text-[11px] font-bold text-emerald-600 shadow-sm flex items-center gap-0.5"
+                title="目標:90%以上">
+                <span>🎯</span><span id="coverage-val">0</span>%
+            </div>
+            <div
+                class="bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded-full border border-rose-200 text-[11px] font-bold text-rose-500 shadow-sm flex items-center gap-0.5">
+                <span>⚠️</span>-<span id="penalty-val">0</span>
+            </div>
+        </div>
 
-    <div class="absolute top-2 right-2 flex gap-1 z-20">
-      <div class="bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded-full border border-emerald-200 text-[11px] font-bold text-emerald-600 shadow-sm flex items-center gap-0.5" title="目標:90%以上">
-        <span>🎯</span><span id="coverage-val">0</span>%
-      </div>
-      <div class="bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded-full border border-rose-200 text-[11px] font-bold text-rose-500 shadow-sm flex items-center gap-0.5">
-        <span>⚠️</span>-<span id="penalty-val">0</span>
-      </div>
-    </div>
+        <canvas id="game-canvas"
+            class="w-full h-full bg-white rounded-3xl border-4 border-indigo-200 shadow-xl touch-none cursor-crosshair"></canvas>
 
-    <canvas id="game-canvas" class="w-full h-full bg-white rounded-3xl border-4 border-indigo-200 shadow-xl touch-none cursor-crosshair"></canvas>
+        <!-- オーバーレイ -->
+        <div id="overlay"
+            class="absolute inset-0 bg-white/95 rounded-3xl flex flex-col items-center justify-center p-5 text-center shadow-2xl z-30 transition-all duration-300">
+            <div id="overlay-icon" class="text-4xl mb-1">✏️✨</div>
+            <h2 id="overlay-title" class="text-xl font-black mb-1 text-indigo-600">ビリビリ！文字なぞりチャレンジ 〜 数字編</h2>
+            <p id="overlay-desc" class="text-xs text-slate-500 mb-4 leading-relaxed font-bold">
+                書き始めにある鉛筆をつかんで丁寧になぞろう！<br>
+                持ちやすい場所をつかんでOK！指で文字が隠れないよ！<br>
+                はみ出し10回でゲームオーバー！
+            </p>
+            <button id="start-btn"
+                class="px-6 py-2.5 bg-gradient-to-r from-orange-400 to-amber-500 hover:from-orange-500 hover:to-amber-600 text-white font-black text-base rounded-2xl shadow-lg shadow-orange-300/50 transform active:scale-95 transition-all">
+                ゲームスタート！
+            </button>
+        </div>
+    </main>
 
-    <!-- オーバーレイ -->
-    <div id="overlay" class="absolute inset-0 bg-white/95 rounded-3xl flex flex-col items-center justify-center p-5 text-center shadow-2xl z-30 transition-all duration-300">
-      <div id="overlay-icon" class="text-4xl mb-1">✍️✨</div>
-      <h2 id="overlay-title" class="text-xl font-black mb-1 text-indigo-600">ビリビリ！文字なぞりチャレンジ 〜 数字編</h2>
-      <p id="overlay-desc" class="text-xs text-slate-500 mb-4 leading-relaxed font-bold">
-        お手本を90%以上丁寧になぞろう！<br>
-        はみ出し10回でゲームオーバー！
-      </p>
-      <button id="start-btn" class="px-6 py-2.5 bg-gradient-to-r from-orange-400 to-amber-500 hover:from-orange-500 hover:to-amber-600 text-white font-black text-base rounded-2xl shadow-lg shadow-orange-300/50 transform active:scale-95 transition-all">
-        ゲームスタート！
-      </button>
-    </div>
-  </main>
+    <!-- フッター -->
+    <footer class="w-full max-w-md mx-auto flex flex-col gap-1.5 shrink-0 z-10 pb-1">
+        <div class="bg-white/80 backdrop-blur-sm rounded-xl p-2 border border-indigo-100 shadow-sm flex flex-col gap-1">
+            <div class="flex justify-between items-center px-1 text-[9px] font-bold text-slate-400">
+                <span>📜 なぞり結果の履歴</span>
+                <span>凡例: 🎯カバー率(目標90%) / ⚠️減点</span>
+            </div>
+            <div id="history-container"
+                class="flex gap-1.5 overflow-x-auto custom-scrollbar pb-1 min-h-[46px] items-center">
+                <span id="history-empty"
+                    class="text-[10px] text-slate-400 font-bold w-full text-center py-1">ここに文字ごとの評価履歴が流れます</span>
+            </div>
+        </div>
 
-  <!-- フッター -->
-  <footer class="w-full max-w-md mx-auto flex flex-col gap-1.5 shrink-0 z-10 pb-1">
-    <div class="bg-white/80 backdrop-blur-sm rounded-xl p-2 border border-indigo-100 shadow-sm flex flex-col gap-1">
-      <div class="flex justify-between items-center px-1 text-[9px] font-bold text-slate-400">
-        <span>📜 なぞり結果の履歴</span>
-        <span>凡例: 🎯カバー率(目標90%) / ⚠️減点</span>
-      </div>
-      <div id="history-container" class="flex gap-1.5 overflow-x-auto custom-scrollbar pb-1 min-h-[46px] items-center">
-        <span id="history-empty" class="text-[10px] text-slate-400 font-bold w-full text-center py-1">ここに文字ごとの評価履歴が流れます</span>
-      </div>
-    </div>
+        <div
+            class="bg-white/90 backdrop-blur-sm px-3 py-2 rounded-xl border border-indigo-100 shadow-sm flex justify-between items-center text-xs font-bold">
+            <span id="status-msg" class="text-slate-500 truncate mr-2 text-[11px]">書き始めの鉛筆をつかんでなぞってね！</span>
+            <label for="import-json"
+                class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-lg cursor-pointer transition-all border border-indigo-200 flex items-center gap-1 shrink-0 text-[10px]">
+                📂 JSON読込
+            </label>
+            <input type="file" id="import-json" accept=".json" class="hidden">
+        </div>
+    </footer>
 
-    <div class="bg-white/90 backdrop-blur-sm px-3 py-2 rounded-xl border border-indigo-100 shadow-sm flex justify-between items-center text-xs font-bold">
-      <span id="status-msg" class="text-slate-500 truncate mr-2 text-[11px]">文字をなぞってね！</span>
-      <label for="import-json" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-lg cursor-pointer transition-all border border-indigo-200 flex items-center gap-1 shrink-0 text-[10px]">
-        📂 JSON読込
-      </label>
-      <input type="file" id="import-json" accept=".json" class="hidden">
-    </div>
-  </footer>
+    <script>
+        const INITIAL_DIGITS = {
+            "0": { "strokes": [[{ "x": 58, "y": 19, "hOut": { "x": 42, "y": 19 } }, { "x": 32, "y": 50, "hIn": { "x": 39, "y": 35 }, "hOut": { "x": 28, "y": 65 } }, { "x": 42, "y": 82, "hIn": { "x": 29, "y": 82 }, "hOut": { "x": 56, "y": 81 } }, { "x": 66, "y": 55, "hIn": { "x": 61, "y": 73 }, "hOut": { "x": 68, "y": 42 } }, { "x": 61, "y": 20, "hIn": { "x": 71, "y": 27 } }]] },
+            "1": { "strokes": [[{ "x": 57, "y": 18, "hOut": { "x": 57, "y": 18 } }, { "x": 39, "y": 83, "hIn": { "x": 39, "y": 83 } }]] },
+            "2": { "strokes": [[{ "x": 36, "y": 34, "hOut": { "x": 45, "y": 16 } }, { "x": 73, "y": 34, "hIn": { "x": 73, "y": 14 }, "hOut": { "x": 73, "y": 48 } }, { "x": 30, "y": 80, "hIn": { "x": 34, "y": 74 }, "hOut": { "x": 34, "y": 80 } }, { "x": 67, "y": 80, "hIn": { "x": 67, "y": 80 } }]] },
+            "3": { "strokes": [[{ "x": 44, "y": 25, "hOut": { "x": 53, "y": 18 } }, { "x": 76, "y": 33, "hIn": { "x": 80, "y": 12 }, "hOut": { "x": 72, "y": 50 } }, { "x": 48, "y": 51, "hIn": { "x": 50, "y": 51 }, "hOut": { "x": 50, "y": 51 } }, { "x": 73, "y": 67, "hIn": { "x": 79, "y": 46 }, "hOut": { "x": 69, "y": 77 } }, { "x": 37, "y": 78, "hIn": { "x": 58, "y": 89 } }]] },
+            "4": { "strokes": [[{ "x": 46, "y": 20, "hOut": { "x": 46, "y": 20 } }, { "x": 25, "y": 59, "hIn": { "x": 27, "y": 59 }, "hOut": { "x": 28, "y": 59 } }, { "x": 74, "y": 60, "hIn": { "x": 74, "y": 60 } }], [{ "x": 70, "y": 20, "hOut": { "x": 70, "y": 20 } }, { "x": 51, "y": 83, "hIn": { "x": 51, "y": 83 } }]] },
+            "5": { "strokes": [[{ "x": 48, "y": 18, "hOut": { "x": 48, "y": 18 } }, { "x": 38, "y": 48, "hIn": { "x": 38, "y": 48 }, "hOut": { "x": 38, "y": 48 } }, { "x": 64, "y": 66, "hIn": { "x": 70, "y": 44 }, "hOut": { "x": 63, "y": 77 } }, { "x": 31, "y": 76, "hIn": { "x": 49, "y": 87 } }], [{ "x": 49, "y": 23, "hOut": { "x": 49, "y": 23 } }, { "x": 71, "y": 23, "hIn": { "x": 71, "y": 23 } }]] },
+            "6": { "strokes": [[{ "x": 69, "y": 18, "hOut": { "x": 61, "y": 23 } }, { "x": 41, "y": 53, "hIn": { "x": 45, "y": 41 }, "hOut": { "x": 34, "y": 65 } }, { "x": 50, "y": 83, "hIn": { "x": 38, "y": 82 }, "hOut": { "x": 62, "y": 83 } }, { "x": 70, "y": 67, "hIn": { "x": 70, "y": 79 }, "hOut": { "x": 70, "y": 55 } }, { "x": 42, "y": 59, "hIn": { "x": 51, "y": 49 } }]] },
+            "7": {
+                "strokes": [
+                    [
+                        {
+                            "x": 41,
+                            "y": 18,
+                            "hOut": {
+                                "x": 41,
+                                "y": 20
+                            }
+                        },
+                        {
+                            "x": 35,
+                            "y": 36,
+                            "hIn": {
+                                "x": 35,
+                                "y": 35
+                            }
+                        }
+                    ],
+                    [
+                        {
+                            "x": 41,
+                            "y": 21,
+                            "hOut": {
+                                "x": 41,
+                                "y": 21
+                            }
+                        },
+                        {
+                            "x": 71,
+                            "y": 20,
+                            "hIn": {
+                                "x": 71,
+                                "y": 21
+                            },
+                            "hOut": {
+                                "x": 71,
+                                "y": 21
+                            }
+                        },
+                        {
+                            "x": 46,
+                            "y": 83,
+                            "hIn": {
+                                "x": 46,
+                                "y": 83
+                            }
+                        }
+                    ]
+                ],
+                "arrows": [
+                    {
+                        "x": 41,
+                        "y": 18,
+                        "angle": 114.77514056883193
+                    },
+                    {
+                        "x": 53,
+                        "y": 21,
+                        "angle": 0
+                    }
+                ]
+            },
+            "8": { "strokes": [[{ "x": 73, "y": 23, "hOut": { "x": 69, "y": 12 } }, { "x": 38, "y": 22, "hIn": { "x": 46, "y": 8 }, "hOut": { "x": 32, "y": 37 } }, { "x": 46, "y": 84, "hIn": { "x": 91, "y": 70 }, "hOut": { "x": 20, "y": 78 } }, { "x": 46, "y": 51, "hIn": { "x": 27, "y": 60 }, "hOut": { "x": 53, "y": 44 } }, { "x": 75, "y": 28, "hIn": { "x": 80, "y": 25 } }]] },
+            "9": { "strokes": [[{ "x": 72, "y": 24, "hOut": { "x": 72, "y": 20 } }, { "x": 51, "y": 13, "hIn": { "x": 62, "y": 11 }, "hOut": { "x": 43, "y": 13 } }, { "x": 36, "y": 30, "hIn": { "x": 36, "y": 20 }, "hOut": { "x": 36, "y": 40 } }, { "x": 51, "y": 45, "hIn": { "x": 42, "y": 43 }, "hOut": { "x": 64, "y": 45 } }, { "x": 71, "y": 27, "hIn": { "x": 72, "y": 28 }, "hOut": { "x": 80, "y": 23 } }, { "x": 46, "y": 85, "hIn": { "x": 46, "y": 85 } }]] },
+            "=": { "strokes": [[{ "x": 28, "y": 40, "hOut": { "x": 28, "y": 40 } }, { "x": 71, "y": 40, "hIn": { "x": 71, "y": 40 } }], [{ "x": 28, "y": 60, "hOut": { "x": 28, "y": 60 } }, { "x": 71, "y": 60, "hIn": { "x": 71, "y": 60 } }]] }
+        };
 
-  <script>
-    const INITIAL_DIGITS = {
-      "0": { "strokes": [[{"x":58,"y":19,"hOut":{"x":42,"y":19}},{"x":32,"y":50,"hIn":{"x":39,"y":35},"hOut":{"x":28,"y":65}},{"x":42,"y":82,"hIn":{"x":29,"y":82},"hOut":{"x":56,"y":81}},{"x":66,"y":55,"hIn":{"x":61,"y":73},"hOut":{"x":68,"y":42}},{"x":61,"y":20,"hIn":{"x":71,"y":27}}]] },
-      "1": { "strokes": [[{"x":57,"y":18,"hOut":{"x":57,"y":18}},{"x":39,"y":83,"hIn":{"x":39,"y":83}}]] },
-      "2": { "strokes": [[{"x":36,"y":34,"hOut":{"x":45,"y":16}},{"x":73,"y":34,"hIn":{"x":73,"y":14},"hOut":{"x":73,"y":48}},{"x":30,"y":80,"hIn":{"x":34,"y":74},"hOut":{"x":34,"y":80}},{"x":67,"y":80,"hIn":{"x":67,"y":80}}]] },
-      "3": { "strokes": [[{"x":44,"y":25,"hOut":{"x":53,"y":18}},{"x":76,"y":33,"hIn":{"x":80,"y":12},"hOut":{"x":72,"y":50}},{"x":48,"y":51,"hIn":{"x":50,"y":51},"hOut":{"x":50,"y":51}},{"x":73,"y":67,"hIn":{"x":79,"y":46},"hOut":{"x":69,"y":77}},{"x":37,"y":78,"hIn":{"x":58,"y":89}}]] },
-      "4": { "strokes": [[{"x":46,"y":20,"hOut":{"x":46,"y":20}},{"x":25,"y":59,"hIn":{"x":27,"y":59},"hOut":{"x":28,"y":59}},{"x":74,"y":60,"hIn":{"x":74,"y":60}}],[{"x":70,"y":20,"hOut":{"x":70,"y":20}},{"x":51,"y":83,"hIn":{"x":51,"y":83}}]] },
-      "5": { "strokes": [[{"x":48,"y":18,"hOut":{"x":48,"y":18}},{"x":38,"y":48,"hIn":{"x":38,"y":48},"hOut":{"x":38,"y":48}},{"x":64,"y":66,"hIn":{"x":70,"y":44},"hOut":{"x":63,"y":77}},{"x":31,"y":76,"hIn":{"x":49,"y":87}}],[{"x":49,"y":23,"hOut":{"x":49,"y":23}},{"x":71,"y":23,"hIn":{"x":71,"y":23}}]] },
-      "6": { "strokes": [[{"x":69,"y":18,"hOut":{"x":61,"y":23}},{"x":41,"y":53,"hIn":{"x":45,"y":41},"hOut":{"x":34,"y":65}},{"x":50,"y":83,"hIn":{"x":38,"y":82},"hOut":{"x":62,"y":83}},{"x":70,"y":67,"hIn":{"x":70,"y":79},"hOut":{"x":70,"y":55}},{"x":42,"y":59,"hIn":{"x":51,"y":49}}]] },
-      "7": { "strokes": [[{"x":35,"y":37,"hOut":{"x":35,"y":37}},{"x":45,"y":14,"hIn":{"x":35,"y":37},"hOut":{"x":42,"y":14}},{"x":43,"y":14,"hIn":{"x":44,"y":14}}],[{"x":46,"y":18,"hOut":{"x":46,"y":18}},{"x":75,"y":18,"hIn":{"x":75,"y":18},"hOut":{"x":75,"y":18}},{"x":46,"y":83,"hIn":{"x":46,"y":83}}]] },
-      "8": { "strokes": [[{"x":75,"y":28,"hOut":{"x":80,"y":25}},{"x":46,"y":51,"hIn":{"x":53,"y":44},"hOut":{"x":27,"y":60}},{"x":46,"y":84,"hIn":{"x":20,"y":78},"hOut":{"x":91,"y":70}},{"x":38,"y":22,"hIn":{"x":32,"y":37},"hOut":{"x":46,"y":8}},{"x":73,"y":23,"hIn":{"x":69,"y":12}}]] },
-      "9": { "strokes": [[{"x":72,"y":24,"hOut":{"x":72,"y":20}},{"x":51,"y":13,"hIn":{"x":62,"y":11},"hOut":{"x":43,"y":13}},{"x":36,"y":30,"hIn":{"x":36,"y":20},"hOut":{"x":36,"y":40}},{"x":51,"y":45,"hIn":{"x":42,"y":43},"hOut":{"x":64,"y":45}},{"x":71,"y":27,"hIn":{"x":72,"y":28},"hOut":{"x":80,"y":23}},{"x":46,"y":85,"hIn":{"x":46,"y":85}}]] },
-      "=": { "strokes": [[{"x":28,"y":40,"hOut":{"x":28,"y":40}},{"x":71,"y":40,"hIn":{"x":71,"y":40}}],[{"x":28,"y":60,"hOut":{"x":28,"y":60}},{"x":71,"y":60,"hIn":{"x":71,"y":60}}]] }
-    };
+        const ALL_CHARS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '='];
 
-    const ALL_CHARS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '='];
+        let fontData = structuredClone(INITIAL_DIGITS);
+        let level = 1;
+        let score = 0;
+        let combo = 0;
+        let lives = 10;
+        let penaltyScore = 0;
+        let currentChar = '1';
+        let previousChar = '';
+        let currentStrokeIndex = 0;
+        let isDrawing = false;
+        let isGameOver = false;
 
-    let fontData = structuredClone(INITIAL_DIGITS);
-    let level = 1;
-    let score = 0;
-    let combo = 0;
-    let lives = 10; 
-    let penaltyScore = 0; 
-    let currentChar = '1';
-    let previousChar = '';
-    let currentStrokeIndex = 0;
-    let isDrawing = false;
-    let isGameOver = false;
+        let pencilTipPos = { x: 0, y: 0 };
+        let currentTouchPos = null;
+        let grabOffset = { x: 0, y: 0 };
 
-    let lastPenaltyTime = 0;
-    const PENALTY_COOLDOWN_MS = 300; 
+        let lastPenaltyTime = 0;
+        const PENALTY_COOLDOWN_MS = 300;
 
-    let currentPath = [];
-    let completedPaths = [];
+        let currentPath = [];
+        let completedPaths = [];
 
-    let targetSamplePoints = [];
-    let strokeCoverageList = [];
+        let targetSamplePoints = [];
+        let strokeCoverageList = [];
 
-    const canvas = document.getElementById('game-canvas');
-    const ctx = canvas.getContext('2d');
-    const hitCanvas = document.createElement('canvas');
-    const hitCtx = hitCanvas.getContext('2d');
-    
-    const pCanvas = document.getElementById('particle-canvas');
-    const pCtx = pCanvas.getContext('2d');
-    let particles = [];
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        const hitCanvas = document.createElement('canvas');
+        const hitCtx = hitCanvas.getContext('2d');
 
-    function resizeCanvas() {
-      const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width * window.devicePixelRatio;
-      canvas.height = rect.height * window.devicePixelRatio;
-      hitCanvas.width = canvas.width;
-      hitCanvas.height = canvas.height;
+        const pCanvas = document.getElementById('particle-canvas');
+        const pCtx = pCanvas.getContext('2d');
+        let particles = [];
 
-      pCanvas.width = window.innerWidth;
-      pCanvas.height = window.innerHeight;
-    }
-    window.addEventListener('resize', resizeCanvas);
+        function resizeCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * window.devicePixelRatio;
+            canvas.height = rect.height * window.devicePixelRatio;
+            hitCanvas.width = canvas.width;
+            hitCanvas.height = canvas.height;
 
-    function getDifficultyParams() {
-      const canvasSize = canvas.width;
-      const scalePercent = Math.max(0.28, 0.85 - (level - 1) * 0.085);
-      const scale = canvasSize * scalePercent;
-      const offsetX = (canvasSize - scale) / 2;
-      const offsetY = (canvasSize - scale) / 2;
-      const guideLineWidth = Math.max(14, 65 - (level - 1) * 6.5) * (canvasSize / 400);
-
-      return { scale, offsetX, offsetY, guideLineWidth };
-    }
-
-    function prepareStrokeSamplePoints(stroke, scale, offsetX, offsetY) {
-      const points = [];
-      if (!stroke || stroke.length < 2) return points;
-
-      for (let i = 1; i < stroke.length; i++) {
-        const prev = stroke[i - 1];
-        const curr = stroke[i];
-        
-        const p0 = { x: offsetX + (prev.x / 100) * scale, y: offsetY + (prev.y / 100) * scale };
-        const p1 = { x: offsetX + ((prev.hOut ? prev.hOut.x : prev.x) / 100) * scale, y: offsetY + ((prev.hOut ? prev.hOut.y : prev.y) / 100) * scale };
-        const p2 = { x: offsetX + ((curr.hIn ? curr.hIn.x : curr.x) / 100) * scale, y: offsetY + ((curr.hIn ? curr.hIn.y : curr.y) / 100) * scale };
-        const p3 = { x: offsetX + (curr.x / 100) * scale, y: offsetY + (curr.y / 100) * scale };
-
-        const steps = 30;
-        for (let t = 0; t <= steps; t++) {
-          const u = t / steps;
-          const cx = Math.pow(1 - u, 3) * p0.x + 3 * Math.pow(1 - u, 2) * u * p1.x + 3 * (1 - u) * Math.pow(u, 2) * p2.x + Math.pow(u, 3) * p3.x;
-          const cy = Math.pow(1 - u, 3) * p0.y + 3 * Math.pow(1 - u, 2) * u * p1.y + 3 * (1 - u) * Math.pow(u, 2) * p2.y + Math.pow(u, 3) * p3.y;
-          points.push({ x: cx, y: cy, hit: false });
+            pCanvas.width = window.innerWidth;
+            pCanvas.height = window.innerHeight;
         }
-      }
-      return points;
-    }
+        window.addEventListener('resize', resizeCanvas);
 
-    function drawStroke(targetCtx, stroke, scale, offsetX, offsetY, lineWidth, strokeColor) {
-      if (!stroke || stroke.length === 0) return;
-      targetCtx.beginPath();
-      const startX = offsetX + (stroke[0].x / 100) * scale;
-      const startY = offsetY + (stroke[0].y / 100) * scale;
-      targetCtx.moveTo(startX, startY);
+        function getDifficultyParams() {
+            const canvasSize = canvas.width;
+            const scalePercent = Math.max(0.28, 0.85 - (level - 1) * 0.085);
+            const scale = canvasSize * scalePercent;
+            const offsetX = (canvasSize - scale) / 2;
+            const offsetY = (canvasSize - scale) / 2;
+            const guideLineWidth = Math.max(14, 65 - (level - 1) * 6.5) * (canvasSize / 400);
 
-      for (let i = 1; i < stroke.length; i++) {
-        const prev = stroke[i - 1];
-        const curr = stroke[i];
-        const cp1x = offsetX + ((prev.hOut ? prev.hOut.x : prev.x) / 100) * scale;
-        const cp1y = offsetY + ((prev.hOut ? prev.hOut.y : prev.y) / 100) * scale;
-        const cp2x = offsetX + ((curr.hIn ? curr.hIn.x : curr.x) / 100) * scale;
-        const cp2y = offsetY + ((curr.hIn ? curr.hIn.y : curr.y) / 100) * scale;
-        const endX = offsetX + (curr.x / 100) * scale;
-        const endY = offsetY + (curr.y / 100) * scale;
-        targetCtx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, endX, endY);
-      }
-      targetCtx.strokeStyle = strokeColor;
-      targetCtx.lineWidth = lineWidth;
-      targetCtx.lineCap = 'round';
-      targetCtx.lineJoin = 'round';
-      targetCtx.stroke();
-    }
-
-    function nextRandomChar() {
-      const candidates = ALL_CHARS.filter(c => c !== previousChar);
-      const picked = candidates[Math.floor(Math.random() * candidates.length)];
-      previousChar = picked;
-      currentChar = picked;
-      currentStrokeIndex = 0;
-      completedPaths = [];
-      currentPath = [];
-      penaltyScore = 0;
-      strokeCoverageList = [];
-      initCurrentStrokeData();
-    }
-
-    function initCurrentStrokeData() {
-      resizeCanvas(); 
-      const digitData = fontData[currentChar];
-      if (!digitData) return;
-      const { scale, offsetX, offsetY } = getDifficultyParams();
-      const activeStroke = digitData.strokes[currentStrokeIndex];
-      targetSamplePoints = prepareStrokeSamplePoints(activeStroke, scale, offsetX, offsetY);
-      
-      document.getElementById('coverage-val').textContent = '0';
-      document.getElementById('penalty-val').textContent = Math.round(penaltyScore);
-    }
-
-    function render() {
-      const digitData = fontData[currentChar];
-      if (!digitData) return;
-
-      const { scale, offsetX, offsetY, guideLineWidth } = getDifficultyParams();
-      const totalStrokes = digitData.strokes.length;
-
-      document.getElementById('current-stroke-val').textContent = currentStrokeIndex + 1;
-      document.getElementById('total-strokes-val').textContent = totalStrokes;
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      digitData.strokes.forEach((stroke, idx) => {
-        const isCurrent = idx === currentStrokeIndex;
-        const color = isCurrent ? 'rgba(99, 102, 241, 0.25)' : 'rgba(203, 213, 225, 0.2)';
-        const coreColor = isCurrent ? 'rgba(99, 102, 241, 0.6)' : 'rgba(148, 163, 184, 0.3)';
-        drawStroke(ctx, stroke, scale, offsetX, offsetY, guideLineWidth, color);
-        drawStroke(ctx, stroke, scale, offsetX, offsetY, 3, coreColor);
-      });
-
-      completedPaths.forEach(path => drawPathOnContext(ctx, path, '#6366f1'));
-
-      if (currentPath.length > 1) {
-        drawPathOnContext(ctx, currentPath, '#38bdf8');
-      }
-
-      // 当たり判定裏キャンバス描画
-      hitCtx.clearRect(0, 0, hitCanvas.width, hitCanvas.height);
-      const activeStroke = digitData.strokes[currentStrokeIndex];
-      if (activeStroke) {
-        drawStroke(hitCtx, activeStroke, scale, offsetX, offsetY, guideLineWidth, '#ffffff');
-      }
-    }
-
-    function drawPathOnContext(targetCtx, path, color) {
-      if (path.length < 2) return;
-      targetCtx.beginPath();
-      targetCtx.moveTo(path[0].x, path[0].y);
-      for (let i = 1; i < path.length; i++) {
-        targetCtx.lineTo(path[i].x, path[i].y);
-      }
-      targetCtx.strokeStyle = color;
-      targetCtx.lineWidth = 10 * (canvas.width / 400);
-      targetCtx.lineCap = 'round';
-      targetCtx.lineJoin = 'round';
-      targetCtx.stroke();
-    }
-
-    function processTracePoint(x, y) {
-      if (isGameOver) return;
-      const { guideLineWidth } = getDifficultyParams();
-
-      let isOut = false;
-      if (x < 0 || x >= hitCanvas.width || y < 0 || y >= hitCanvas.height) {
-        isOut = true;
-      } else {
-        const pixel = hitCtx.getImageData(Math.floor(x), Math.floor(y), 1, 1).data;
-        if (pixel[3] === 0) isOut = true;
-      }
-
-      const now = Date.now();
-      if (isOut && (now - lastPenaltyTime > PENALTY_COOLDOWN_MS)) {
-        lastPenaltyTime = now;
-        penaltyScore += 5;
-        document.getElementById('penalty-val').textContent = Math.round(penaltyScore);
-
-        lives--;
-        updateLifeUI();
-        triggerOutEffects();
-
-        if (lives <= 0) {
-          triggerGameOver();
-          return;
+            return { scale, offsetX, offsetY, guideLineWidth };
         }
-      }
 
-      const hitRadius = guideLineWidth * 0.9;
-      let hitCount = 0;
-      targetSamplePoints.forEach(pt => {
-        if (!pt.hit) {
-          const dist = Math.hypot(pt.x - x, pt.y - y);
-          if (dist <= hitRadius) pt.hit = true;
+        function prepareStrokeSamplePoints(stroke, scale, offsetX, offsetY) {
+            const points = [];
+            if (!stroke || stroke.length < 2) return points;
+
+            for (let i = 1; i < stroke.length; i++) {
+                const prev = stroke[i - 1];
+                const curr = stroke[i];
+
+                const p0 = { x: offsetX + (prev.x / 100) * scale, y: offsetY + (prev.y / 100) * scale };
+                const p1 = { x: offsetX + ((prev.hOut ? prev.hOut.x : prev.x) / 100) * scale, y: offsetY + ((prev.hOut ? prev.hOut.y : prev.y) / 100) * scale };
+                const p2 = { x: offsetX + ((curr.hIn ? curr.hIn.x : curr.x) / 100) * scale, y: offsetY + ((curr.hIn ? curr.hIn.y : curr.y) / 100) * scale };
+                const p3 = { x: offsetX + (curr.x / 100) * scale, y: offsetY + (curr.y / 100) * scale };
+
+                const steps = 30;
+                for (let t = 0; t <= steps; t++) {
+                    const u = t / steps;
+                    const cx = Math.pow(1 - u, 3) * p0.x + 3 * Math.pow(1 - u, 2) * u * p1.x + 3 * (1 - u) * Math.pow(u, 2) * p2.x + Math.pow(u, 3) * p3.x;
+                    const cy = Math.pow(1 - u, 3) * p0.y + 3 * Math.pow(1 - u, 2) * u * p1.y + 3 * (1 - u) * Math.pow(u, 2) * p2.y + Math.pow(u, 3) * p3.y;
+                    points.push({ x: cx, y: cy, hit: false });
+                }
+            }
+            return points;
         }
-        if (pt.hit) hitCount++;
-      });
 
-      const coveragePercent = targetSamplePoints.length > 0 
-        ? Math.floor((hitCount / targetSamplePoints.length) * 100) 
-        : 0;
-      
-      document.getElementById('coverage-val').textContent = coveragePercent;
-    }
+        function drawStroke(targetCtx, stroke, scale, offsetX, offsetY, lineWidth, strokeColor) {
+            if (!stroke || stroke.length === 0) return;
+            targetCtx.beginPath();
+            const startX = offsetX + (stroke[0].x / 100) * scale;
+            const startY = offsetY + (stroke[0].y / 100) * scale;
+            targetCtx.moveTo(startX, startY);
 
-    function updateLifeUI() {
-      const container = document.getElementById('life-container');
-      let html = '';
-      for (let i = 0; i < 10; i++) {
-        if (i < lives) {
-          html += '<span class="animate-pulse">❤️</span>';
-        } else {
-          html += '<span class="opacity-20 grayscale">🖤</span>';
+            for (let i = 1; i < stroke.length; i++) {
+                const prev = stroke[i - 1];
+                const curr = stroke[i];
+                const cp1x = offsetX + ((prev.hOut ? prev.hOut.x : prev.x) / 100) * scale;
+                const cp1y = offsetY + ((prev.hOut ? prev.hOut.y : prev.y) / 100) * scale;
+                const cp2x = offsetX + ((curr.hIn ? curr.hIn.x : curr.x) / 100) * scale;
+                const cp2y = offsetY + ((curr.hIn ? curr.hIn.y : curr.y) / 100) * scale;
+                const endX = offsetX + (curr.x / 100) * scale;
+                const endY = offsetY + (curr.y / 100) * scale;
+                targetCtx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, endX, endY);
+            }
+            targetCtx.strokeStyle = strokeColor;
+            targetCtx.lineWidth = lineWidth;
+            targetCtx.lineCap = 'round';
+            targetCtx.lineJoin = 'round';
+            targetCtx.stroke();
         }
-      }
-      container.innerHTML = html;
-    }
 
-    function triggerOutEffects() {
-      if (navigator.vibrate) navigator.vibrate(50);
-
-      const container = document.getElementById('game-container');
-      container.classList.add('animate-shake');
-      setTimeout(() => container.classList.remove('animate-shake'), 250);
-
-      const flash = document.getElementById('flash-overlay');
-      flash.style.opacity = '1';
-      setTimeout(() => flash.style.opacity = '0', 120);
-    }
-
-    function getCanvasCoords(e) {
-      const rect = canvas.getBoundingClientRect();
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      return {
-        x: (clientX - rect.left) * (canvas.width / rect.width),
-        y: (clientY - rect.top) * (canvas.height / rect.height)
-      };
-    }
-
-    function startDraw(e) {
-      if (isGameOver) return;
-      isDrawing = true;
-      currentPath = [];
-      
-      // 1. 判定用の裏キャンバス・お手本座標を直前に完璧にレンダリング・確定させる
-      render();
-
-      // 2. タッチされた点の座標を取得して処理
-      const coords = getCanvasCoords(e);
-      currentPath.push(coords);
-      processTracePoint(coords.x, coords.y);
-      render();
-    }
-
-    function moveDraw(e) {
-      if (!isDrawing || isGameOver) return;
-      const coords = getCanvasCoords(e);
-      currentPath.push(coords);
-      processTracePoint(coords.x, coords.y);
-      render();
-    }
-
-    function endDraw() {
-      if (!isDrawing || isGameOver) return;
-      isDrawing = false;
-
-      if (currentPath.length > 1) {
-        completedPaths.push([...currentPath]);
-      }
-      currentPath = [];
-
-      const hitCount = targetSamplePoints.filter(p => p.hit).length;
-      const coverage = targetSamplePoints.length > 0 ? (hitCount / targetSamplePoints.length) * 100 : 0;
-      strokeCoverageList.push(Math.floor(coverage));
-
-      // カバー率 90% 以上で合格
-      if (coverage < 90) {
-        document.getElementById('status-msg').textContent = `❌ 端折らずしっかりなぞってね！ (カバー率:${Math.floor(coverage)}% / 目標90%)`;
-        document.getElementById('status-msg').className = 'text-rose-500 font-bold';
-        evaluateRound(false);
-        return;
-      }
-
-      const digitData = fontData[currentChar];
-      const totalStrokes = digitData.strokes.length;
-
-      if (currentStrokeIndex + 1 < totalStrokes) {
-        currentStrokeIndex++;
-        initCurrentStrokeData();
-        render(); // 次の画数の判定マスクを準備
-        document.getElementById('status-msg').textContent = `✨ つぎの画（${currentStrokeIndex + 1}画目）をかこう！`;
-        document.getElementById('status-msg').className = 'text-indigo-600 font-bold';
-      } else {
-        evaluateRound(true);
-      }
-    }
-
-    function evaluateRound(isSuccess) {
-      const avgCoverage = strokeCoverageList.length > 0 
-        ? Math.round(strokeCoverageList.reduce((a, b) => a + b, 0) / strokeCoverageList.length)
-        : 0;
-      
-      const roundedPenalty = Math.round(penaltyScore);
-
-      if (isSuccess) {
-        const finalRoundScore = Math.max(0, Math.round(100 - penaltyScore));
-        combo++;
-
-        if (combo % 2 === 0) level++;
-
-        const multiplier = 1 + (level - 1) * 0.6;
-        const bonus = Math.round(combo * 40 * multiplier);
-        const roundTotal = Math.round(finalRoundScore * multiplier) + bonus;
-        score += roundTotal;
-
-        spawnConfetti();
-        addHistoryCard(currentChar, avgCoverage, roundedPenalty, finalRoundScore, true);
-
-        const msg = combo % 2 === 0 
-          ? `🎉 SPEED UP! (LV.${level}) +${roundTotal}pt` 
-          : `✨ ナイス！ (精度:${finalRoundScore}点 +${roundTotal}pt)`;
-
-        document.getElementById('status-msg').textContent = msg;
-        document.getElementById('status-msg').className = 'text-emerald-500 font-extrabold';
-
-        setTimeout(() => {
-          if (!isGameOver) {
-            nextRandomChar();
-            document.getElementById('status-msg').textContent = '文字をなぞってね！';
-            document.getElementById('status-msg').className = 'text-slate-500';
-            render();
-          }
-        }, 800);
-
-      } else {
-        combo = 0;
-        addHistoryCard(currentChar, avgCoverage, roundedPenalty, 0, false);
-
-        setTimeout(() => {
-          if (!isGameOver) {
+        function nextRandomChar() {
+            const candidates = ALL_CHARS.filter(c => c !== previousChar);
+            const picked = candidates[Math.floor(Math.random() * candidates.length)];
+            previousChar = picked;
+            currentChar = picked;
             currentStrokeIndex = 0;
             completedPaths = [];
             currentPath = [];
             penaltyScore = 0;
             strokeCoverageList = [];
             initCurrentStrokeData();
+        }
+
+        function initCurrentStrokeData() {
+            resizeCanvas();
+            const digitData = fontData[currentChar];
+            if (!digitData) return;
+            const { scale, offsetX, offsetY } = getDifficultyParams();
+            const activeStroke = digitData.strokes[currentStrokeIndex];
+            targetSamplePoints = prepareStrokeSamplePoints(activeStroke, scale, offsetX, offsetY);
+
+            const startPos = getStrokeStartPos();
+            if (startPos) {
+                pencilTipPos = { ...startPos };
+            }
+
+            document.getElementById('coverage-val').textContent = '0';
+            document.getElementById('penalty-val').textContent = Math.round(penaltyScore);
+        }
+
+        function getStrokeStartPos() {
+            const digitData = fontData[currentChar];
+            if (!digitData) return null;
+            const activeStroke = digitData.strokes[currentStrokeIndex];
+            if (!activeStroke || activeStroke.length === 0) return null;
+
+            const { scale, offsetX, offsetY } = getDifficultyParams();
+            const startPt = activeStroke[0];
+            return {
+                x: offsetX + (startPt.x / 100) * scale,
+                y: offsetY + (startPt.y / 100) * scale
+            };
+        }
+
+        function render() {
+            const digitData = fontData[currentChar];
+            if (!digitData) return;
+
+            const { scale, offsetX, offsetY, guideLineWidth } = getDifficultyParams();
+            const totalStrokes = digitData.strokes.length;
+
+            document.getElementById('current-stroke-val').textContent = currentStrokeIndex + 1;
+            document.getElementById('total-strokes-val').textContent = totalStrokes;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            digitData.strokes.forEach((stroke, idx) => {
+                const isCurrent = idx === currentStrokeIndex;
+                const color = isCurrent ? 'rgba(99, 102, 241, 0.25)' : 'rgba(203, 213, 225, 0.2)';
+                const coreColor = isCurrent ? 'rgba(99, 102, 241, 0.6)' : 'rgba(148, 163, 184, 0.3)';
+                drawStroke(ctx, stroke, scale, offsetX, offsetY, guideLineWidth, color);
+                drawStroke(ctx, stroke, scale, offsetX, offsetY, 3, coreColor);
+            });
+
+            completedPaths.forEach(path => drawPathOnContext(ctx, path, '#6366f1'));
+
+            if (currentPath.length > 1) {
+                drawPathOnContext(ctx, currentPath, '#38bdf8');
+            }
+
+            hitCtx.clearRect(0, 0, hitCanvas.width, hitCanvas.height);
+            const activeStroke = digitData.strokes[currentStrokeIndex];
+            if (activeStroke) {
+                drawStroke(hitCtx, activeStroke, scale, offsetX, offsetY, guideLineWidth, '#ffffff');
+            }
+
+            drawPencilUI(ctx, pencilTipPos, currentTouchPos, isDrawing ? 1.0 : 0.65, isDrawing);
+        }
+
+        function drawPencilUI(targetCtx, tipPos, touchPos, alpha = 1.0, isHolding = false) {
+            targetCtx.save();
+            targetCtx.globalAlpha = alpha;
+
+            const scaleFactor = canvas.width / 400;
+
+            if (isHolding && touchPos) {
+                targetCtx.beginPath();
+                targetCtx.arc(touchPos.x, touchPos.y, 12 * scaleFactor, 0, Math.PI * 2);
+                targetCtx.fillStyle = 'rgba(239, 68, 68, 0.25)';
+                targetCtx.fill();
+                targetCtx.strokeStyle = 'rgba(239, 68, 68, 0.8)';
+                targetCtx.lineWidth = 2 * scaleFactor;
+                targetCtx.stroke();
+
+                targetCtx.beginPath();
+                targetCtx.setLineDash([4, 4]);
+                targetCtx.moveTo(touchPos.x, touchPos.y);
+                targetCtx.lineTo(tipPos.x, tipPos.y);
+                targetCtx.strokeStyle = 'rgba(99, 102, 241, 0.4)';
+                targetCtx.lineWidth = 1.5 * scaleFactor;
+                targetCtx.stroke();
+                targetCtx.setLineDash([]);
+            }
+
+            targetCtx.translate(tipPos.x, tipPos.y);
+            targetCtx.rotate((-35 * Math.PI) / 180);
+
+            if (isHolding) {
+                targetCtx.scale(1.08, 1.08);
+            }
+
+            targetCtx.beginPath();
+            targetCtx.arc(0, 0, 4.5 * scaleFactor, 0, Math.PI * 2);
+            targetCtx.fillStyle = '#f59e0b';
+            targetCtx.fill();
+
+            targetCtx.beginPath();
+            targetCtx.moveTo(0, 0);
+            targetCtx.lineTo(6 * scaleFactor, 14 * scaleFactor);
+            targetCtx.lineTo(-6 * scaleFactor, 14 * scaleFactor);
+            targetCtx.closePath();
+            targetCtx.fillStyle = '#334155';
+            targetCtx.fill();
+
+            targetCtx.beginPath();
+            targetCtx.moveTo(6 * scaleFactor, 14 * scaleFactor);
+            targetCtx.lineTo(11 * scaleFactor, 28 * scaleFactor);
+            targetCtx.lineTo(-11 * scaleFactor, 28 * scaleFactor);
+            targetCtx.lineTo(-6 * scaleFactor, 14 * scaleFactor);
+            targetCtx.closePath();
+            targetCtx.fillStyle = '#fde68a';
+            targetCtx.fill();
+
+            targetCtx.beginPath();
+            targetCtx.rect(-11 * scaleFactor, 28 * scaleFactor, 22 * scaleFactor, 75 * scaleFactor);
+            targetCtx.fillStyle = '#fbbf24';
+            targetCtx.fill();
+            targetCtx.strokeStyle = '#d97706';
+            targetCtx.lineWidth = 1 * scaleFactor;
+            targetCtx.stroke();
+
+            targetCtx.fillStyle = '#f59e0b';
+            targetCtx.fillRect(-4 * scaleFactor, 28 * scaleFactor, 8 * scaleFactor, 75 * scaleFactor);
+
+            targetCtx.fillStyle = '#94a3b8';
+            targetCtx.fillRect(-11 * scaleFactor, 103 * scaleFactor, 22 * scaleFactor, 14 * scaleFactor);
+
+            targetCtx.beginPath();
+            targetCtx.roundRect(-10 * scaleFactor, 117 * scaleFactor, 20 * scaleFactor, 18 * scaleFactor, [0, 0, 6, 6]);
+            targetCtx.fillStyle = '#fda4af';
+            targetCtx.fill();
+
+            if (!isHolding) {
+                targetCtx.beginPath();
+                targetCtx.arc(0, 50 * scaleFactor, 32 * scaleFactor, 0, Math.PI * 2);
+                targetCtx.strokeStyle = 'rgba(99, 102, 241, 0.5)';
+                targetCtx.lineWidth = 2 * scaleFactor;
+                targetCtx.setLineDash([5, 5]);
+                targetCtx.stroke();
+            }
+
+            targetCtx.restore();
+        }
+
+        function drawPathOnContext(targetCtx, path, color) {
+            if (path.length < 2) return;
+            targetCtx.beginPath();
+            targetCtx.moveTo(path[0].x, path[0].y);
+            for (let i = 1; i < path.length; i++) {
+                targetCtx.lineTo(path[i].x, path[i].y);
+            }
+            targetCtx.strokeStyle = color;
+            targetCtx.lineWidth = 10 * (canvas.width / 400);
+            targetCtx.lineCap = 'round';
+            targetCtx.lineJoin = 'round';
+            targetCtx.stroke();
+        }
+
+        function processTracePoint(x, y) {
+            if (isGameOver) return;
+            const { guideLineWidth } = getDifficultyParams();
+
+            let isOut = false;
+            if (x < 0 || x >= hitCanvas.width || y < 0 || y >= hitCanvas.height) {
+                isOut = true;
+            } else {
+                const pixel = hitCtx.getImageData(Math.floor(x), Math.floor(y), 1, 1).data;
+                if (pixel[3] === 0) isOut = true;
+            }
+
+            const now = Date.now();
+            if (isOut && (now - lastPenaltyTime > PENALTY_COOLDOWN_MS)) {
+                lastPenaltyTime = now;
+                penaltyScore += 5;
+                document.getElementById('penalty-val').textContent = Math.round(penaltyScore);
+
+                lives--;
+                updateLifeUI();
+                triggerOutEffects();
+
+                if (lives <= 0) {
+                    triggerGameOver();
+                    return;
+                }
+            }
+
+            const hitRadius = guideLineWidth * 0.9;
+            let hitCount = 0;
+            targetSamplePoints.forEach(pt => {
+                if (!pt.hit) {
+                    const dist = Math.hypot(pt.x - x, pt.y - y);
+                    if (dist <= hitRadius) pt.hit = true;
+                }
+                if (pt.hit) hitCount++;
+            });
+
+            const coveragePercent = targetSamplePoints.length > 0
+                ? Math.floor((hitCount / targetSamplePoints.length) * 100)
+                : 0;
+
+            document.getElementById('coverage-val').textContent = coveragePercent;
+        }
+
+        function updateLifeUI() {
+            const container = document.getElementById('life-container');
+            let html = '';
+            for (let i = 0; i < 10; i++) {
+                if (i < lives) {
+                    html += '<span class="animate-pulse">❤️</span>';
+                } else {
+                    html += '<span class="opacity-20 grayscale">🖤</span>';
+                }
+            }
+            container.innerHTML = html;
+        }
+
+        function triggerOutEffects() {
+            if (navigator.vibrate) navigator.vibrate(50);
+
+            const container = document.getElementById('game-container');
+            container.classList.add('animate-shake');
+            setTimeout(() => container.classList.remove('animate-shake'), 250);
+
+            const flash = document.getElementById('flash-overlay');
+            flash.style.opacity = '1';
+            setTimeout(() => flash.style.opacity = '0', 120);
+        }
+
+        function getCanvasTouchPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            return {
+                x: (clientX - rect.left) * (canvas.width / rect.width),
+                y: (clientY - rect.top) * (canvas.height / rect.height)
+            };
+        }
+
+        // ペンのグラブ（掴み）判定：ペン先からお尻の先までしっかりカバー
+        function isTouchingPencil(touchPos) {
+            const scaleFactor = canvas.width / 400;
+
+            // 右手傾き（-35度）の時、ペン先からお尻へ向かう正しく計算された方向ベクトル（右下方向）
+            const rad = (-35 * Math.PI) / 180;
+            const dirX = Math.sin(-rad); // 正の値（右方向）
+            const dirY = Math.cos(-rad); // 正の値（下方向）
+
+            // ペン先 (ax, ay) から お尻の末端 (bx, by) までの線分を定義（消しゴム長約135px＋余白）
+            const ax = pencilTipPos.x;
+            const ay = pencilTipPos.y;
+            const bx = pencilTipPos.x + dirX * 140 * scaleFactor;
+            const by = pencilTipPos.y + dirY * 140 * scaleFactor;
+
+            // タッチ位置 (px, py) から線分 (ab) への最短距離（点と線分の距離）を算出
+            const pax = touchPos.x - ax;
+            const pay = touchPos.y - ay;
+            const bax = bx - ax;
+            const bay = by - ay;
+
+            const ab2 = bax * bax + bay * bay;
+            const t = Math.max(0, Math.min(1, (pax * bax + pay * bay) / ab2));
+
+            // 最短距離の点を求める
+            const nearestX = ax + t * bax;
+            const nearestY = ay + t * bay;
+
+            const dist = Math.hypot(touchPos.x - nearestX, touchPos.y - nearestY);
+
+            // 軸の太さ＋指の当たり判定余白（半径75px）
+            const grabRadius = 75 * scaleFactor;
+
+            return dist <= grabRadius;
+        }
+
+
+        function startDraw(e) {
+            if (isGameOver) return;
+
+            const touchPos = getCanvasTouchPos(e);
+
+            if (isTouchingPencil(touchPos)) {
+                isDrawing = true;
+                currentTouchPos = touchPos;
+
+                grabOffset = {
+                    x: pencilTipPos.x - touchPos.x,
+                    y: pencilTipPos.y - touchPos.y
+                };
+
+                if (navigator.vibrate) navigator.vibrate(20);
+
+                currentPath = [];
+                currentPath.push({ ...pencilTipPos });
+                processTracePoint(pencilTipPos.x, pencilTipPos.y);
+                render();
+            }
+        }
+
+        function moveDraw(e) {
+            if (!isDrawing || isGameOver) return;
+            const touchPos = getCanvasTouchPos(e);
+            currentTouchPos = touchPos;
+
+            pencilTipPos = {
+                x: touchPos.x + grabOffset.x,
+                y: touchPos.y + grabOffset.y
+            };
+
+            currentPath.push({ ...pencilTipPos });
+            processTracePoint(pencilTipPos.x, pencilTipPos.y);
             render();
-          }
-        }, 1200);
-      }
+        }
 
-      updateUI();
-    }
+        function endDraw() {
+            if (!isDrawing || isGameOver) return;
+            isDrawing = false;
+            currentTouchPos = null;
 
-    function triggerGameOver() {
-      isGameOver = true;
-      isDrawing = false;
+            if (currentPath.length > 1) {
+                completedPaths.push([...currentPath]);
+            }
+            currentPath = [];
 
-      document.getElementById('overlay-icon').textContent = '💀';
-      document.getElementById('overlay-title').textContent = 'ゲームオーバー！';
-      document.getElementById('overlay-desc').innerHTML = `
+            const hitCount = targetSamplePoints.filter(p => p.hit).length;
+            const coverage = targetSamplePoints.length > 0 ? (hitCount / targetSamplePoints.length) * 100 : 0;
+            strokeCoverageList.push(Math.floor(coverage));
+
+            if (coverage < 90) {
+                document.getElementById('status-msg').textContent = `❌ 端折らずしっかりなぞってね！ (カバー率:${Math.floor(coverage)}% / 目標90%)`;
+                document.getElementById('status-msg').className = 'text-rose-500 font-bold';
+                evaluateRound(false);
+                return;
+            }
+
+            const digitData = fontData[currentChar];
+            const totalStrokes = digitData.strokes.length;
+
+            if (currentStrokeIndex + 1 < totalStrokes) {
+                currentStrokeIndex++;
+                initCurrentStrokeData();
+                render();
+                document.getElementById('status-msg').textContent = `✨ つぎの画（${currentStrokeIndex + 1}画目）をかこう！`;
+                document.getElementById('status-msg').className = 'text-indigo-600 font-bold';
+            } else {
+                evaluateRound(true);
+            }
+        }
+
+        function evaluateRound(isSuccess) {
+            const avgCoverage = strokeCoverageList.length > 0
+                ? Math.round(strokeCoverageList.reduce((a, b) => a + b, 0) / strokeCoverageList.length)
+                : 0;
+
+            const roundedPenalty = Math.round(penaltyScore);
+
+            if (isSuccess) {
+                const finalRoundScore = Math.max(0, Math.round(100 - penaltyScore));
+                combo++;
+
+                if (combo % 2 === 0) level++;
+
+                const multiplier = 1 + (level - 1) * 0.6;
+                const bonus = Math.round(combo * 40 * multiplier);
+                const roundTotal = Math.round(finalRoundScore * multiplier) + bonus;
+                score += roundTotal;
+
+                spawnConfetti();
+                addHistoryCard(currentChar, avgCoverage, roundedPenalty, finalRoundScore, true);
+
+                const msg = combo % 2 === 0
+                    ? `🎉 SPEED UP! (LV.${level}) +${roundTotal}pt`
+                    : `✨ ナイス！ (精度:${finalRoundScore}点 +${roundTotal}pt)`;
+
+                document.getElementById('status-msg').textContent = msg;
+                document.getElementById('status-msg').className = 'text-emerald-500 font-extrabold';
+
+                setTimeout(() => {
+                    if (!isGameOver) {
+                        nextRandomChar();
+                        document.getElementById('status-msg').textContent = '書き始めの鉛筆をつかんでなぞってね！';
+                        document.getElementById('status-msg').className = 'text-slate-500';
+                        render();
+                    }
+                }, 800);
+
+            } else {
+                combo = 0;
+                addHistoryCard(currentChar, avgCoverage, roundedPenalty, 0, false);
+
+                setTimeout(() => {
+                    if (!isGameOver) {
+                        currentStrokeIndex = 0;
+                        completedPaths = [];
+                        currentPath = [];
+                        penaltyScore = 0;
+                        strokeCoverageList = [];
+                        initCurrentStrokeData();
+                        render();
+                    }
+                }, 1200);
+            }
+
+            updateUI();
+        }
+
+        function triggerGameOver() {
+            isGameOver = true;
+            isDrawing = false;
+
+            document.getElementById('overlay-icon').textContent = '💀';
+            document.getElementById('overlay-title').textContent = 'ゲームオーバー！';
+            document.getElementById('overlay-desc').innerHTML = `
         ライフがなくなりました！<br>
         <span class="text-base text-indigo-600 font-black">到達レベル: LV.${level}</span><br>
         <span class="text-xl text-emerald-500 font-black">最終スコア: ${score} pt</span>
       `;
-      document.getElementById('start-btn').textContent = 'もう一度挑戦！';
+            document.getElementById('start-btn').textContent = 'もう一度挑戦！';
 
-      const overlay = document.getElementById('overlay');
-      overlay.classList.remove('opacity-0', 'pointer-events-none');
-    }
+            const overlay = document.getElementById('overlay');
+            overlay.classList.remove('opacity-0', 'pointer-events-none');
+        }
 
-    function addHistoryCard(char, coverage, penalty, scoreVal, isSuccess) {
-      const emptyMsg = document.getElementById('history-empty');
-      if (emptyMsg) emptyMsg.remove();
+        function addHistoryCard(char, coverage, penalty, scoreVal, isSuccess) {
+            const emptyMsg = document.getElementById('history-empty');
+            if (emptyMsg) emptyMsg.remove();
 
-      const container = document.getElementById('history-container');
-      const card = document.createElement('div');
+            const container = document.getElementById('history-container');
+            const card = document.createElement('div');
 
-      const bgClass = isSuccess ? 'bg-indigo-50 border-indigo-200' : 'bg-rose-50 border-rose-200';
-      const textClass = isSuccess ? 'text-indigo-600' : 'text-rose-500';
+            const bgClass = isSuccess ? 'bg-indigo-50 border-indigo-200' : 'bg-rose-50 border-rose-200';
+            const textClass = isSuccess ? 'text-indigo-600' : 'text-rose-500';
 
-      card.className = `${bgClass} border-2 rounded-lg px-2 py-1 flex items-center gap-1.5 shrink-0 shadow-sm animate-fade-in`;
-      card.innerHTML = `
+            card.className = `${bgClass} border-2 rounded-lg px-2 py-1 flex items-center gap-1.5 shrink-0 shadow-sm animate-fade-in`;
+            card.innerHTML = `
         <div class="text-lg font-black ${textClass} w-5 text-center leading-none">${char}</div>
         <div class="flex flex-col text-[9px] font-bold leading-tight">
           <div class="flex items-center gap-0.5 text-slate-600">
@@ -575,115 +837,116 @@
         </div>
       `;
 
-      container.insertBefore(card, container.firstChild);
-    }
-
-    function updateUI() {
-      document.getElementById('level-val').textContent = level;
-      document.getElementById('combo-val').childNodes[0].textContent = combo + ' ';
-      document.getElementById('score-val').textContent = score;
-
-      const body = document.getElementById('bg-body');
-      const feverBadge = document.getElementById('fever-badge');
-
-      if (combo >= 3) {
-        body.classList.add('fever-bg');
-        feverBadge.classList.remove('hidden');
-      } else {
-        body.classList.remove('fever-bg');
-        feverBadge.classList.add('hidden');
-      }
-    }
-
-    function spawnConfetti() {
-      const colors = ['#f43f5e', '#3b82f6', '#10b981', '#eab308', '#a855f7', '#ec4899'];
-      for (let i = 0; i < 40; i++) {
-        particles.push({
-          x: pCanvas.width / 2 + (Math.random() - 0.5) * 100,
-          y: pCanvas.height / 2 + (Math.random() - 0.5) * 100,
-          vx: (Math.random() - 0.5) * 14,
-          vy: (Math.random() - 0.8) * 16,
-          size: Math.random() * 8 + 4,
-          color: colors[Math.floor(Math.random() * colors.length)],
-          rotation: Math.random() * 360,
-          vRot: (Math.random() - 0.5) * 10,
-          life: 1.0
-        });
-      }
-    }
-
-    function updateParticles() {
-      pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
-      for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i];
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vy += 0.4;
-        p.rotation += p.vRot;
-        p.life -= 0.02;
-
-        if (p.life <= 0) {
-          particles.splice(i, 1);
-          continue;
+            container.insertBefore(card, container.firstChild);
         }
 
-        pCtx.save();
-        pCtx.translate(p.x, p.y);
-        pCtx.rotate((p.rotation * Math.PI) / 180);
-        pCtx.fillStyle = p.color;
-        pCtx.globalAlpha = p.life;
-        pCtx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
-        pCtx.restore();
-      }
-      requestAnimationFrame(updateParticles);
-    }
-    requestAnimationFrame(updateParticles);
+        function updateUI() {
+            document.getElementById('level-val').textContent = level;
+            document.getElementById('combo-val').childNodes[0].textContent = combo + ' ';
+            document.getElementById('score-val').textContent = score;
 
-    canvas.addEventListener('mousedown', startDraw);
-    canvas.addEventListener('mousemove', moveDraw);
-    canvas.addEventListener('mouseup', endDraw);
+            const body = document.getElementById('bg-body');
+            const feverBadge = document.getElementById('fever-badge');
 
-    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDraw(e); }, { passive: false });
-    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); moveDraw(e); }, { passive: false });
-    canvas.addEventListener('touchend', endDraw);
+            if (combo >= 3) {
+                body.classList.add('fever-bg');
+                feverBadge.classList.remove('hidden');
+            } else {
+                body.classList.remove('fever-bg');
+                feverBadge.classList.add('hidden');
+            }
+        }
 
-    document.getElementById('start-btn').addEventListener('click', () => {
-      document.getElementById('overlay').classList.add('opacity-0', 'pointer-events-none');
-      level = 1;
-      score = 0;
-      combo = 0;
-      lives = 10;
-      isGameOver = false;
-      previousChar = '';
-      document.getElementById('history-container').innerHTML = '<span id="history-empty" class="text-[10px] text-slate-400 font-bold w-full text-center py-1">ここに文字ごとの評価履歴が流れます</span>';
-      
-      updateLifeUI();
-      nextRandomChar();
-      updateUI();
-      render();
-    });
+        function spawnConfetti() {
+            const colors = ['#f43f5e', '#3b82f6', '#10b981', '#eab308', '#a855f7', '#ec4899'];
+            for (let i = 0; i < 40; i++) {
+                particles.push({
+                    x: pCanvas.width / 2 + (Math.random() - 0.5) * 100,
+                    y: pCanvas.height / 2 + (Math.random() - 0.5) * 100,
+                    vx: (Math.random() - 0.5) * 14,
+                    vy: (Math.random() - 0.8) * 16,
+                    size: Math.random() * 8 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    rotation: Math.random() * 360,
+                    vRot: (Math.random() - 0.5) * 10,
+                    life: 1.0
+                });
+            }
+        }
 
-    document.getElementById('import-json').addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
+        function updateParticles() {
+            pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.4;
+                p.rotation += p.vRot;
+                p.life -= 0.02;
 
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        try {
-          const importedData = JSON.parse(event.target.result);
-          if (importedData['1'] && importedData['2']) {
-            fontData = importedData;
-            alert('新しいフォントデータを読み込みました！');
+                if (p.life <= 0) {
+                    particles.splice(i, 1);
+                    continue;
+                }
+
+                pCtx.save();
+                pCtx.translate(p.x, p.y);
+                pCtx.rotate((p.rotation * Math.PI) / 180);
+                pCtx.fillStyle = p.color;
+                pCtx.globalAlpha = p.life;
+                pCtx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                pCtx.restore();
+            }
+            requestAnimationFrame(updateParticles);
+        }
+        requestAnimationFrame(updateParticles);
+
+        canvas.addEventListener('mousedown', startDraw);
+        canvas.addEventListener('mousemove', moveDraw);
+        canvas.addEventListener('mouseup', endDraw);
+
+        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDraw(e); }, { passive: false });
+        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); moveDraw(e); }, { passive: false });
+        canvas.addEventListener('touchend', endDraw);
+
+        document.getElementById('start-btn').addEventListener('click', () => {
+            document.getElementById('overlay').classList.add('opacity-0', 'pointer-events-none');
+            level = 1;
+            score = 0;
+            combo = 0;
+            lives = 10;
+            isGameOver = false;
+            previousChar = '';
+            document.getElementById('history-container').innerHTML = '<span id="history-empty" class="text-[10px] text-slate-400 font-bold w-full text-center py-1">ここに文字ごとの評価履歴が流れます</span>';
+
+            updateLifeUI();
+            nextRandomChar();
+            updateUI();
             render();
-          } else {
-            alert('無効なJSONフォーマットです。');
-          }
-        } catch (err) {
-          alert('ファイルの読み込みに失敗しました。');
-        }
-      };
-      reader.readAsText(file);
-    });
-  </script>
+        });
+
+        document.getElementById('import-json').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const importedData = JSON.parse(event.target.result);
+                    if (importedData['1'] && importedData['2']) {
+                        fontData = importedData;
+                        alert('新しいフォントデータを読み込みました！');
+                        render();
+                    } else {
+                        alert('無効なJSONフォーマットです。');
+                    }
+                } catch (err) {
+                    alert('ファイルの読み込みに失敗しました。');
+                }
+            };
+            reader.readAsText(file);
+        });
+    </script>
 </body>
+
 </html>
