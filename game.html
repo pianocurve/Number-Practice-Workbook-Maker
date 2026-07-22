@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>わくわく！文字なぞりチャレンジ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      touch-action: none;
+      user-select: none;
+    }
+
+    /* 画面シェイクアニメーション */
+    @keyframes shake {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      20% { transform: translate(-8px, 5px) rotate(-1deg); }
+      40% { transform: translate(8px, -5px) rotate(1deg); }
+      60% { transform: translate(-5px, -3px) rotate(-0.5deg); }
+      80% { transform: translate(5px, 3px) rotate(0.5deg); }
+    }
+    .animate-shake {
+      animation: shake 0.25s ease-in-out;
+    }
+
+    /* 赤いピカッとフラッシュ */
+    #flash-overlay {
+      pointer-events: none;
+      transition: opacity 0.15s ease-out;
+    }
+  </style>
+</head>
+<body class="bg-amber-50 text-slate-800 min-h-screen flex flex-col items-center justify-between p-4 relative overflow-hidden">
+
+  <!-- 赤いフラッシュ用オーバーレイ -->
+  <div id="flash-overlay" class="fixed inset-0 bg-red-500/30 opacity-0 z-50"></div>
+
+  <!-- ヘッダー / ステータス表示 -->
+  <header class="w-full max-w-md bg-white rounded-3xl p-4 shadow-xl border-4 border-yellow-300 flex justify-between items-center z-10">
+    <div class="flex items-center gap-3">
+      <div class="bg-yellow-400 text-yellow-900 font-black px-3 py-1.5 rounded-2xl text-xs flex flex-col items-center shadow-inner">
+        <span>LV</span>
+        <span id="level-val" class="text-xl leading-none">1</span>
+      </div>
+      <div>
+        <div class="text-xs font-bold text-slate-400">COMBO</div>
+        <div id="combo-val" class="text-2xl font-black text-orange-500 flex items-center gap-1">
+          0 <span id="combo-badge" class="hidden text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full border border-orange-300">UP!</span>
+        </div>
+      </div>
+    </div>
+    <div class="text-right">
+      <div class="text-xs font-bold text-slate-400">SCORE</div>
+      <div id="score-val" class="text-3xl font-black text-emerald-500 tracking-wider">0</div>
+    </div>
+  </header>
+
+  <!-- メインキャンバスエリア -->
+  <main id="game-container" class="relative w-full max-w-md aspect-square my-auto flex items-center justify-center z-10">
+    <!-- 画数プログレス表示 -->
+    <div id="stroke-indicator" class="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full border-2 border-indigo-200 text-xs font-bold text-indigo-600 z-20 shadow-md">
+      画数: <span id="current-stroke-val">1</span> / <span id="total-strokes-val">1</span>
+    </div>
+
+    <canvas id="game-canvas" class="w-full h-full bg-white rounded-3xl border-4 border-indigo-200 shadow-2xl touch-none cursor-crosshair"></canvas>
+
+    <!-- スタート / リザルト オーバーレイ -->
+    <div id="overlay" class="absolute inset-0 bg-white/95 rounded-3xl flex flex-col items-center justify-center p-6 text-center shadow-2xl z-30 transition-all duration-300">
+      <div class="text-5xl mb-2">✍️✨</div>
+      <h2 id="overlay-title" class="text-2xl font-black mb-2 text-indigo-600">文字なぞりチャレンジ！</h2>
+      <p id="overlay-desc" class="text-xs text-slate-500 mb-6 leading-relaxed font-bold">
+        線をはみ出さないように丁寧になぞろう！<br>
+        コンボが続くと自動でレベル＆スコア倍率アップ！
+      </p>
+      <button id="start-btn" class="px-8 py-3.5 bg-gradient-to-r from-orange-400 to-amber-500 hover:from-orange-500 hover:to-amber-600 text-white font-black text-lg rounded-2xl shadow-lg shadow-orange-300/50 transform active:scale-95 transition-all">
+        ゲームスタート！
+      </button>
+    </div>
+  </main>
+
+  <!-- フッター / ステータス & JSON読込 -->
+  <footer class="w-full max-w-md flex flex-col gap-2 z-10">
+    <div class="bg-white p-3.5 rounded-2xl border-2 border-indigo-100 shadow-md flex justify-between items-center text-xs font-bold">
+      <span id="status-msg" class="text-slate-500">文字をなぞってね！</span>
+      <label for="import-json" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-xl cursor-pointer transition-all border border-indigo-200 flex items-center gap-1">
+        📂 JSON読込
+      </label>
+      <input type="file" id="import-json" accept=".json" class="hidden">
+    </div>
+  </footer>
+
+  <script>
+    // 1. 初期描画データ
+    const INITIAL_DIGITS = {
+      "0": { "strokes": [[{"x":58,"y":19,"hOut":{"x":42,"y":19}},{"x":32,"y":50,"hIn":{"x":39,"y":35},"hOut":{"x":28,"y":65}},{"x":42,"y":82,"hIn":{"x":29,"y":82},"hOut":{"x":56,"y":81}},{"x":66,"y":55,"hIn":{"x":61,"y":73},"hOut":{"x":68,"y":42}},{"x":61,"y":20,"hIn":{"x":71,"y":27}}]] },
+      "1": { "strokes": [[{"x":57,"y":18,"hOut":{"x":57,"y":18}},{"x":39,"y":83,"hIn":{"x":39,"y":83}}]] },
+      "2": { "strokes": [[{"x":36,"y":34,"hOut":{"x":45,"y":16}},{"x":73,"y":34,"hIn":{"x":73,"y":14},"hOut":{"x":73,"y":48}},{"x":30,"y":80,"hIn":{"x":34,"y":74},"hOut":{"x":34,"y":80}},{"x":67,"y":80,"hIn":{"x":67,"y":80}}]] },
+      "3": { "strokes": [[{"x":44,"y":25,"hOut":{"x":53,"y":18}},{"x":76,"y":33,"hIn":{"x":80,"y":12},"hOut":{"x":72,"y":50}},{"x":48,"y":51,"hIn":{"x":50,"y":51},"hOut":{"x":50,"y":51}},{"x":73,"y":67,"hIn":{"x":79,"y":46},"hOut":{"x":69,"y":77}},{"x":37,"y":78,"hIn":{"x":58,"y":89}}]] },
+      "4": { "strokes": [[{"x":46,"y":20,"hOut":{"x":46,"y":20}},{"x":25,"y":59,"hIn":{"x":27,"y":59},"hOut":{"x":28,"y":59}},{"x":74,"y":60,"hIn":{"x":74,"y":60}}],[{"x":70,"y":20,"hOut":{"x":70,"y":20}},{"x":51,"y":83,"hIn":{"x":51,"y":83}}]] },
+      "5": { "strokes": [[{"x":48,"y":18,"hOut":{"x":48,"y":18}},{"x":38,"y":48,"hIn":{"x":38,"y":48},"hOut":{"x":38,"y":48}},{"x":64,"y":66,"hIn":{"x":70,"y":44},"hOut":{"x":63,"y":77}},{"x":31,"y":76,"hIn":{"x":49,"y":87}}],[{"x":49,"y":23,"hOut":{"x":49,"y":23}},{"x":71,"y":23,"hIn":{"x":71,"y":23}}]] },
+      "6": { "strokes": [[{"x":69,"y":18,"hOut":{"x":61,"y":23}},{"x":41,"y":53,"hIn":{"x":45,"y":41},"hOut":{"x":34,"y":65}},{"x":50,"y":83,"hIn":{"x":38,"y":82},"hOut":{"x":62,"y":83}},{"x":70,"y":67,"hIn":{"x":70,"y":79},"hOut":{"x":70,"y":55}},{"x":42,"y":59,"hIn":{"x":51,"y":49}}]] },
+      "7": { "strokes": [[{"x":35,"y":37,"hOut":{"x":35,"y":37}},{"x":45,"y":14,"hIn":{"x":35,"y":37},"hOut":{"x":42,"y":14}},{"x":43,"y":14,"hIn":{"x":44,"y":14}}],[{"x":46,"y":18,"hOut":{"x":46,"y":18}},{"x":75,"y":18,"hIn":{"x":75,"y":18},"hOut":{"x":75,"y":18}},{"x":46,"y":83,"hIn":{"x":46,"y":83}}]] },
+      "8": { "strokes": [[{"x":75,"y":28,"hOut":{"x":80,"y":25}},{"x":46,"y":51,"hIn":{"x":53,"y":44},"hOut":{"x":27,"y":60}},{"x":46,"y":84,"hIn":{"x":20,"y":78},"hOut":{"x":91,"y":70}},{"x":38,"y":22,"hIn":{"x":32,"y":37},"hOut":{"x":46,"y":8}},{"x":73,"y":23,"hIn":{"x":69,"y":12}}]] },
+      "9": { "strokes": [[{"x":72,"y":24,"hOut":{"x":72,"y":20}},{"x":51,"y":13,"hIn":{"x":62,"y":11},"hOut":{"x":43,"y":13}},{"x":36,"y":30,"hIn":{"x":36,"y":20},"hOut":{"x":36,"y":40}},{"x":51,"y":45,"hIn":{"x":42,"y":43},"hOut":{"x":64,"y":45}},{"x":71,"y":27,"hIn":{"x":72,"y":28},"hOut":{"x":80,"y":23}},{"x":46,"y":85,"hIn":{"x":46,"y":85}}]] },
+      "=": { "strokes": [[{"x":28,"y":40,"hOut":{"x":28,"y":40}},{"x":71,"y":40,"hIn":{"x":71,"y":40}}],[{"x":28,"y":60,"hOut":{"x":28,"y":60}},{"x":71,"y":60,"hIn":{"x":71,"y":60}}]] }
+    };
+
+    const ALL_CHARS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '='];
+
+    // ゲーム状態
+    let fontData = structuredClone(INITIAL_DIGITS);
+    let level = 1;
+    let score = 0;
+    let combo = 0;
+    let currentScore = 100;
+    let currentChar = '1';
+    let previousChar = '';
+    let currentStrokeIndex = 0; // 現在なぞっている画数（0始まり）
+    let isDrawing = false;
+    
+    let currentPath = [];        // 現在進行中のストローク
+    let completedPaths = [];    // 書き終わった画数の保存
+
+    // エフェクト用インターバル管理
+    let isFlashing = false;
+
+    // Canvas要素
+    const canvas = document.getElementById('game-canvas');
+    const ctx = canvas.getContext('2d');
+    const hitCanvas = document.createElement('canvas');
+    const hitCtx = hitCanvas.getContext('2d');
+
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * window.devicePixelRatio;
+      canvas.height = rect.height * window.devicePixelRatio;
+      hitCanvas.width = canvas.width;
+      hitCanvas.height = canvas.height;
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    // 2. ベジェ描画補助
+    function drawStroke(targetCtx, stroke, scale, offsetX, offsetY, lineWidth, strokeColor) {
+      if (!stroke || stroke.length === 0) return;
+      targetCtx.beginPath();
+      const startX = offsetX + (stroke[0].x / 100) * scale;
+      const startY = offsetY + (stroke[0].y / 100) * scale;
+      targetCtx.moveTo(startX, startY);
+
+      for (let i = 1; i < stroke.length; i++) {
+        const prev = stroke[i - 1];
+        const curr = stroke[i];
+        const cp1x = offsetX + ((prev.hOut ? prev.hOut.x : prev.x) / 100) * scale;
+        const cp1y = offsetY + ((prev.hOut ? prev.hOut.y : prev.y) / 100) * scale;
+        const cp2x = offsetX + ((curr.hIn ? curr.hIn.x : curr.x) / 100) * scale;
+        const cp2y = offsetY + ((curr.hIn ? curr.hIn.y : curr.y) / 100) * scale;
+        const endX = offsetX + (curr.x / 100) * scale;
+        const endY = offsetY + (curr.y / 100) * scale;
+        targetCtx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, endX, endY);
+      }
+      targetCtx.strokeStyle = strokeColor;
+      targetCtx.lineWidth = lineWidth;
+      targetCtx.lineCap = 'round';
+      targetCtx.lineJoin = 'round';
+      targetCtx.stroke();
+    }
+
+    // 難易度パラメータ
+    function getDifficultyParams() {
+      const canvasSize = canvas.width;
+      // レベルが上がるとスケールが小さくなる (80% -> 最小35%)
+      const scalePercent = Math.max(0.35, 0.80 - (level - 1) * 0.04);
+      const scale = canvasSize * scalePercent;
+      const offsetX = (canvasSize - scale) / 2;
+      const offsetY = (canvasSize - scale) / 2;
+
+      // レベルアップで判定の線が細くなる
+      const guideLineWidth = Math.max(12, 58 - (level - 1) * 3.5) * (canvasSize / 400);
+
+      return { scale, offsetX, offsetY, guideLineWidth };
+    }
+
+    // 3. 次の文字をランダムに選出（連続重複を防ぐ）
+    function nextRandomChar() {
+      const candidates = ALL_CHARS.filter(c => c !== previousChar);
+      const picked = candidates[Math.floor(Math.random() * candidates.length)];
+      previousChar = picked;
+      currentChar = picked;
+      currentStrokeIndex = 0;
+      completedPaths = [];
+      currentPath = [];
+      currentScore = 100;
+    }
+
+    // 4. メイン描画
+    function render() {
+      const digitData = fontData[currentChar];
+      if (!digitData) return;
+
+      const { scale, offsetX, offsetY, guideLineWidth } = getDifficultyParams();
+      const totalStrokes = digitData.strokes.length;
+
+      // インジケーター更新
+      document.getElementById('current-stroke-val').textContent = currentStrokeIndex + 1;
+      document.getElementById('total-strokes-val').textContent = totalStrokes;
+
+      // --- 画面描画 ---
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // お手本ガイド文字（全画数を半透明描画、現在の画数を強調）
+      digitData.strokes.forEach((stroke, idx) => {
+        const isCurrent = idx === currentStrokeIndex;
+        const color = isCurrent ? 'rgba(99, 102, 241, 0.25)' : 'rgba(203, 213, 225, 0.2)';
+        const coreColor = isCurrent ? 'rgba(99, 102, 241, 0.6)' : 'rgba(148, 163, 184, 0.3)';
+        drawStroke(ctx, stroke, scale, offsetX, offsetY, guideLineWidth, color);
+        drawStroke(ctx, stroke, scale, offsetX, offsetY, 3, coreColor);
+      });
+
+      // 書き終わった画数を描画（しっかり固定表示）
+      completedPaths.forEach(path => drawPathOnContext(ctx, path, '#6366f1'));
+
+      // 現在なぞっている画数を描画
+      if (currentPath.length > 1) {
+        drawPathOnContext(ctx, currentPath, '#38bdf8');
+      }
+
+      // --- 当たり判定マスク作成 (裏キャンバス) ---
+      hitCtx.clearRect(0, 0, hitCanvas.width, hitCanvas.height);
+      const activeStroke = digitData.strokes[currentStrokeIndex];
+      if (activeStroke) {
+        drawStroke(hitCtx, activeStroke, scale, offsetX, offsetY, guideLineWidth, '#ffffff');
+      }
+    }
+
+    function drawPathOnContext(targetCtx, path, color) {
+      if (path.length < 2) return;
+      targetCtx.beginPath();
+      targetCtx.moveTo(path[0].x, path[0].y);
+      for (let i = 1; i < path.length; i++) {
+        targetCtx.lineTo(path[i].x, path[i].y);
+      }
+      targetCtx.strokeStyle = color;
+      targetCtx.lineWidth = 10 * (canvas.width / 400);
+      targetCtx.lineCap = 'round';
+      targetCtx.lineJoin = 'round';
+      targetCtx.stroke();
+    }
+
+    // 5. はみ出し判定 ＆ 演出（バイブレーション・画面振動・赤フラッシュ）
+    function checkPoint(x, y) {
+      let isOut = false;
+      if (x < 0 || x >= hitCanvas.width || y < 0 || y >= hitCanvas.height) {
+        isOut = true;
+      } else {
+        const pixel = hitCtx.getImageData(Math.floor(x), Math.floor(y), 1, 1).data;
+        if (pixel[3] === 0) isOut = true;
+      }
+
+      if (isOut) {
+        deductScore();
+        triggerOutEffects();
+      }
+    }
+
+    function deductScore() {
+      currentScore = Math.max(0, currentScore - 1.2);
+      document.getElementById('status-msg').textContent = '⚠️ はみ出しています！';
+      document.getElementById('status-msg').className = 'text-rose-500 font-bold';
+    }
+
+    function triggerOutEffects() {
+      // スマホバイブレーション (対応端末)
+      if (navigator.vibrate) {
+        navigator.vibrate(40);
+      }
+
+      // 視覚演出（連続発生を抑制）
+      if (!isFlashing) {
+        isFlashing = true;
+
+        // 画面シェイク
+        const container = document.getElementById('game-container');
+        container.classList.add('animate-shake');
+        setTimeout(() => container.classList.remove('animate-shake'), 250);
+
+        // 赤いピカッとフラッシュ
+        const flash = document.getElementById('flash-overlay');
+        flash.style.opacity = '1';
+        setTimeout(() => {
+          flash.style.opacity = '0';
+          isFlashing = false;
+        }, 150);
+      }
+    }
+
+    // 6. 入力イベント処理
+    function getCanvasCoords(e) {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return {
+        x: (clientX - rect.left) * (canvas.width / rect.width),
+        y: (clientY - rect.top) * (canvas.height / rect.height)
+      };
+    }
+
+    function startDraw(e) {
+      isDrawing = true;
+      currentPath = [];
+      const coords = getCanvasCoords(e);
+      currentPath.push(coords);
+      checkPoint(coords.x, coords.y);
+      render();
+    }
+
+    function moveDraw(e) {
+      if (!isDrawing) return;
+      const coords = getCanvasCoords(e);
+      currentPath.push(coords);
+      checkPoint(coords.x, coords.y);
+      render();
+    }
+
+    function endDraw() {
+      if (!isDrawing) return;
+      isDrawing = false;
+
+      if (currentPath.length > 1) {
+        completedPaths.push([...currentPath]);
+      }
+      currentPath = [];
+
+      const digitData = fontData[currentChar];
+      const totalStrokes = digitData.strokes.length;
+
+      // まだ描いていない画数があれば次の画へ
+      if (currentStrokeIndex + 1 < totalStrokes) {
+        currentStrokeIndex++;
+        document.getElementById('status-msg').textContent = `つぎの画（${currentStrokeIndex + 1}画目）をかこう！`;
+        document.getElementById('status-msg').className = 'text-indigo-600 font-bold';
+        render();
+      } else {
+        // すべての画数が完了したら評価判定へ
+        evaluateRound();
+      }
+    }
+
+    // 7. 判定とコンボ・自動レベルアップ
+    function evaluateRound() {
+      const finalRoundScore = Math.round(currentScore);
+
+      if (finalRoundScore >= 75) {
+        // クリア成功！
+        combo++;
+        
+        // 3コンボごとに自動的にレベルアップ！
+        let levelUpOccurred = false;
+        if (combo % 3 === 0) {
+          level++;
+          levelUpOccurred = true;
+        }
+
+        // スコア計算 (レベルが上がると獲得倍率もアップ)
+        const multiplier = 1 + (level - 1) * 0.5;
+        const bonus = Math.round(combo * 30 * multiplier);
+        const roundTotal = Math.round(finalRoundScore * multiplier) + bonus;
+        score += roundTotal;
+
+        const msg = levelUpOccurred 
+          ? `🎉 レベルUP (LV.${level})！ +${roundTotal}pt` 
+          : `✨ クリア！ (精度:${finalRoundScore}点 +${roundTotal}pt)`;
+        
+        document.getElementById('status-msg').textContent = msg;
+        document.getElementById('status-msg').className = 'text-emerald-500 font-bold';
+
+        // 次の文字を設定して切り替え
+        setTimeout(() => {
+          nextRandomChar();
+          document.getElementById('status-msg').textContent = '文字をなぞってね！';
+          document.getElementById('status-msg').className = 'text-slate-500';
+          render();
+        }, 800);
+
+      } else {
+        // 失敗（コンボリセット）
+        combo = 0;
+        document.getElementById('status-msg').textContent = `❌ もう一度チャレンジ！ (精度:${finalRoundScore}点)`;
+        document.getElementById('status-msg').className = 'text-rose-500 font-bold';
+
+        setTimeout(() => {
+          // 同じ文字をリトライ
+          currentStrokeIndex = 0;
+          completedPaths = [];
+          currentPath = [];
+          currentScore = 100;
+          document.getElementById('status-msg').textContent = '文字をなぞってね！';
+          document.getElementById('status-msg').className = 'text-slate-500';
+          render();
+        }, 1000);
+      }
+
+      updateUI();
+    }
+
+    function updateUI() {
+      document.getElementById('level-val').textContent = level;
+      document.getElementById('combo-val').childNodes[0].textContent = combo + ' ';
+      document.getElementById('score-val').textContent = score;
+
+      const badge = document.getElementById('combo-badge');
+      if (combo > 0 && combo % 3 === 0) {
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+    }
+
+    // イベント登録
+    canvas.addEventListener('mousedown', startDraw);
+    canvas.addEventListener('mousemove', moveDraw);
+    canvas.addEventListener('mouseup', endDraw);
+
+    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDraw(e); }, { passive: false });
+    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); moveDraw(e); }, { passive: false });
+    canvas.addEventListener('touchend', endDraw);
+
+    // スタートボタン
+    document.getElementById('start-btn').addEventListener('click', () => {
+      document.getElementById('overlay').classList.add('opacity-0', 'pointer-events-none');
+      level = 1;
+      score = 0;
+      combo = 0;
+      previousChar = '';
+      nextRandomChar();
+      updateUI();
+      resizeCanvas();
+      render();
+    });
+
+    // JSON読込
+    document.getElementById('import-json').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const importedData = JSON.parse(event.target.result);
+          if (importedData['1'] && importedData['2']) {
+            fontData = importedData;
+            alert('新しいフォントデータを読み込みました！');
+            render();
+          } else {
+            alert('無効なJSONフォーマットです。');
+          }
+        } catch (err) {
+          alert('ファイルの読み込みに失敗しました。');
+        }
+      };
+      reader.readAsText(file);
+    });
+  </script>
+</body>
+</html>
